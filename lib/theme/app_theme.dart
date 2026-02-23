@@ -6,7 +6,6 @@ class AppTheme {
   static const Color secondary = Color(0xFF818CF8); // Light Indigo
   static const Color accent = Color(0xFF0EA5E9); // Sky Blue
   static const Color dark = Color(0xFF0F172A); // Slate 900
-  static const Color background = Color(0xFFF8FAFC); // Slate 50
   static const Color surface = Colors.white;
   static const Color text = Color(0xFF1E293B); // Slate 800
   static const Color textLight = Color(0xFF64748B); // Slate 500
@@ -14,7 +13,7 @@ class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      scaffoldBackgroundColor: background,
+      scaffoldBackgroundColor: const Color(0xFFF8FAFC), // Slate 50
       primaryColor: primary,
       colorScheme: const ColorScheme.light(
         primary: primary,
