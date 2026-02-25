@@ -92,15 +92,22 @@ class StudentDashboard extends StatelessWidget {
 
               _buildFeatureCard(
                 Icons.star_border_rounded,
-                'My Skills',
-                'Enter and manage your current skill set',
+                'Project Skills',
+                'List your tech stack for group matching',
                 const Color(0xFFF59E0B),
               ),
               const SizedBox(height: 12),
               _buildFeatureCard(
+                Icons.people_outline_rounded,
+                'Find Group',
+                'Match with students based on compatible skills',
+                const Color(0xFF8B5CF6),
+              ),
+              const SizedBox(height: 12),
+              _buildFeatureCard(
                 Icons.group_work_outlined,
-                'Project Collaboration',
-                'Work with group members on active tasks',
+                'Project Dashboard',
+                'Manage tasks and milestones with your team',
                 const Color(0xFF3B82F6),
               ),
               const SizedBox(height: 12),

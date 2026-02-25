@@ -60,8 +60,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
             ),
             SizedBox(height: 8),
-            Text(
-              'Empowering Skills & Growth',
+            const Text(
+              'Perfect Project Partners',
               style: TextStyle(fontSize: 16, color: Colors.white70),
             ),
           ],

@@ -45,7 +45,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: 8),
               const Text(
-                'Join Skillory to manage and enhance skills',
+                'Find your perfect project partners',
                 textAlign: TextAlign.left,
                 style: TextStyle(fontSize: 16, color: AppTheme.textLight),
               ),
@@ -126,6 +126,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 prefixIcon: Icons.lock_outline,
                 isPassword: true,
               ),
+
+              if (_selectedRole == 'Student') ...[
+                const SizedBox(height: 16),
+                const CustomTextField(
+                  label: 'Skills',
+                  hint: 'Flutter, Dart, Python, etc.',
+                  prefixIcon: Icons.psychology_outlined,
+                ),
+              ],
 
               const SizedBox(height: 32),
               CustomButton(
