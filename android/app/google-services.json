@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "230624874365",
+    "project_id": "skillory-3407f",
+    "storage_bucket": "skillory-3407f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:230624874365:android:5c049b8af4dcc041e24614",
+        "android_client_info": {
+          "package_name": "com.example.skillory_coet"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAii7lQNwSuofscZTdSyPMJRHOagQzq8k0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
