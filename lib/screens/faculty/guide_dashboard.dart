@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../models/group.dart';
+import '../../providers/guide_provider.dart';
 import '../../theme/app_theme.dart';
 import '../auth/login_screen.dart';
 
@@ -29,61 +33,8 @@ class GuideDashboard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppTheme.primary, AppTheme.secondary],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  children: [
-                    const Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Mentoring Overview',
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 16,
-                            ),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            'You have 4 active groups and 12 submissions pending review.',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              height: 1.3,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.assignment_turned_in,
-                        size: 40,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 32),
               const Text(
-                'Guide Actions',
+                'My Groups',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -91,32 +42,102 @@ class GuideDashboard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              _buildActionTile(
-                Icons.groups_outlined,
-                'Manage Assigned Students',
-                'View skills and profile of mentees',
-                AppTheme.primary,
-              ),
-              const SizedBox(height: 12),
-              _buildActionTile(
-                Icons.bar_chart_outlined,
-                'Monitor Progress',
-                'Track milestones across groups',
-                Colors.orange,
-              ),
-              const SizedBox(height: 12),
-              _buildActionTile(
-                Icons.chat_bubble_outline_rounded,
-                'Chat with Groups',
-                'Coordinate via direct messages',
-                Colors.green,
-              ),
-              const SizedBox(height: 12),
-              _buildActionTile(
-                Icons.rate_review_outlined,
-                'Review Submissions',
-                'Evaluate files and documentation',
-                Colors.purple,
+              StreamBuilder<List<GroupModel>>(
+                stream: context.watch<GuideProvider>().myGroupsStream,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+
+                  if (snapshot.hasError) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Text(
+                        'Failed to load groups: ${snapshot.error}',
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    );
+                  }
+
+                  final groups = snapshot.data ?? <GroupModel>[];
+
+                  if (groups.isEmpty) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Text(
+                        'No groups assigned yet.',
+                        style: TextStyle(
+                          color: AppTheme.textLight,
+                          fontSize: 14,
+                        ),
+                      ),
+                    );
+                  }
+
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: groups.length,
+                    itemBuilder: (context, index) {
+                      final group = groups[index];
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: AppTheme.surface,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                        ),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          title: Text(
+                            group.name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.text,
+                            ),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 2),
+                              Text(
+                                'Dept: ${group.department} • Sem: ${group.semester}',
+                                style: const TextStyle(
+                                  color: AppTheme.textLight,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Members: ${group.memberIds.length}',
+                                style: const TextStyle(
+                                  color: AppTheme.textLight,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
+                          ),
+                          trailing: const Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            size: 16,
+                            color: AppTheme.textLight,
+                          ),
+                          onTap: () {
+                            // Later: navigate to detailed group view / chat / tasks.
+                          },
+                        ),
+                      );
+                    },
+                  );
+                },
               ),
             ],
           ),
@@ -125,60 +146,4 @@ class GuideDashboard extends StatelessWidget {
     );
   }
 
-  Widget _buildActionTile(
-    IconData icon,
-    String title,
-    String subtitle,
-    Color color,
-  ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-        boxShadow: [
-          BoxShadow(
-            color: color.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 12,
-        ),
-        leading: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, color: color),
-        ),
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-            color: AppTheme.text,
-            fontSize: 16,
-          ),
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 4.0),
-          child: Text(
-            subtitle,
-            style: const TextStyle(color: AppTheme.textLight, fontSize: 13),
-          ),
-        ),
-        trailing: const Icon(
-          Icons.arrow_forward_ios_rounded,
-          size: 16,
-          color: AppTheme.textLight,
-        ),
-        onTap: () {},
-      ),
-    );
-  }
 }

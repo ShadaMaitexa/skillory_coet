@@ -1,8 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
+
+import 'firebase_options.dart';
 import 'theme/app_theme.dart';
 import 'screens/auth/login_screen.dart';
+import 'providers/admin_provider.dart';
+import 'providers/coordinator_provider.dart';
+import 'providers/guide_provider.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const SkilloryApp());
 }
 
@@ -11,11 +22,24 @@ class SkilloryApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Skillory',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      home: const OnboardingScreen(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => AdminProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => CoordinatorProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => GuideProvider(),
+        ),
+      ],
+      child: MaterialApp(
+        title: 'Skillory',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        home: const OnboardingScreen(),
+      ),
     );
   }
 }

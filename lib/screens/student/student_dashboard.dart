@@ -24,108 +24,136 @@ class StudentDashboard extends StatelessWidget {
         ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: AppTheme.surface,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.03),
-                      blurRadius: 15,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundColor: AppTheme.primary.withValues(alpha: 0.1),
-                      child: const Icon(
-                        Icons.person,
-                        size: 36,
-                        color: AppTheme.primary,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          'Welcome, John!',
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.dark,
-                          ),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          'Group 4 - Smart Systems',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: AppTheme.textLight,
-                          ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isWide = constraints.maxWidth > 700;
+            final horizontalPadding = isWide ? constraints.maxWidth * 0.15 : 24.0;
+            final cardWidth =
+                isWide ? (constraints.maxWidth * 0.7 - 24) / 2 : constraints.maxWidth;
+
+            return SingleChildScrollView(
+              padding: EdgeInsets.symmetric(
+                horizontal: horizontalPadding,
+                vertical: 24,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: AppTheme.surface,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.03),
+                          blurRadius: 15,
+                          offset: const Offset(0, 5),
                         ),
                       ],
                     ),
-                  ],
-                ),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 30,
+                          backgroundColor:
+                              AppTheme.primary.withValues(alpha: 0.1),
+                          child: const Icon(
+                            Icons.person,
+                            size: 36,
+                            color: AppTheme.primary,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Text(
+                              'Welcome, John!',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.dark,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              'Group 4 - Smart Systems',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: AppTheme.textLight,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  const Text(
+                    'My Activities',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.dark,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: [
+                      SizedBox(
+                        width: cardWidth,
+                        child: _buildFeatureCard(
+                          Icons.star_border_rounded,
+                          'Project Skills',
+                          'List your tech stack for group matching',
+                          const Color(0xFFF59E0B),
+                        ),
+                      ),
+                      SizedBox(
+                        width: cardWidth,
+                        child: _buildFeatureCard(
+                          Icons.people_outline_rounded,
+                          'Find Group',
+                          'Match with students based on compatible skills',
+                          const Color(0xFF8B5CF6),
+                        ),
+                      ),
+                      SizedBox(
+                        width: cardWidth,
+                        child: _buildFeatureCard(
+                          Icons.group_work_outlined,
+                          'Project Dashboard',
+                          'Manage tasks and milestones with your team',
+                          const Color(0xFF3B82F6),
+                        ),
+                      ),
+                      SizedBox(
+                        width: cardWidth,
+                        child: _buildFeatureCard(
+                          Icons.chat_outlined,
+                          'Group Chat',
+                          'Communicate and coordinate effectively',
+                          const Color(0xFF10B981),
+                        ),
+                      ),
+                      SizedBox(
+                        width: cardWidth,
+                        child: _buildFeatureCard(
+                          Icons.cloud_upload_outlined,
+                          'Upload Work',
+                          'Submit documents and milestone deliverables',
+                          AppTheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              const SizedBox(height: 32),
-
-              const Text(
-                'My Activities',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.dark,
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              _buildFeatureCard(
-                Icons.star_border_rounded,
-                'Project Skills',
-                'List your tech stack for group matching',
-                const Color(0xFFF59E0B),
-              ),
-              const SizedBox(height: 12),
-              _buildFeatureCard(
-                Icons.people_outline_rounded,
-                'Find Group',
-                'Match with students based on compatible skills',
-                const Color(0xFF8B5CF6),
-              ),
-              const SizedBox(height: 12),
-              _buildFeatureCard(
-                Icons.group_work_outlined,
-                'Project Dashboard',
-                'Manage tasks and milestones with your team',
-                const Color(0xFF3B82F6),
-              ),
-              const SizedBox(height: 12),
-              _buildFeatureCard(
-                Icons.chat_outlined,
-                'Group Chat',
-                'Communicate and coordinate effectively',
-                const Color(0xFF10B981),
-              ),
-              const SizedBox(height: 12),
-              _buildFeatureCard(
-                Icons.cloud_upload_outlined,
-                'Upload Work',
-                'Submit documents and milestone deliverables',
-                AppTheme.primary,
-              ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );

@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../models/group.dart';
+import '../../providers/coordinator_provider.dart';
 import '../../theme/app_theme.dart';
 import '../auth/login_screen.dart';
 
@@ -29,52 +33,8 @@ class CoordinatorDashboard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildStatCard(
-                      'Students',
-                      '120',
-                      Icons.face_outlined,
-                      Colors.indigo,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildStatCard(
-                      'Groups',
-                      '24',
-                      Icons.group_work_outlined,
-                      Colors.orange,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildStatCard(
-                      'Guides',
-                      '12',
-                      Icons.co_present_outlined,
-                      Colors.teal,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildStatCard(
-                      'Progress',
-                      '68%',
-                      Icons.trending_up_rounded,
-                      Colors.pink,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 32),
               const Text(
-                'Coordinator Actions',
+                'My Groups',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -82,28 +42,103 @@ class CoordinatorDashboard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              _buildActionTile(
-                Icons.people_alt_outlined,
-                'Manage Students & Guides',
-                'Edit participants in your class',
-              ),
-              const SizedBox(height: 12),
-              _buildActionTile(
-                Icons.view_array_outlined,
-                'View Groups',
-                'Check assigned members and details',
-              ),
-              const SizedBox(height: 12),
-              _buildActionTile(
-                Icons.assignment_ind_outlined,
-                'Assign Guides',
-                'Map guides to active groups',
-              ),
-              const SizedBox(height: 12),
-              _buildActionTile(
-                Icons.analytics_outlined,
-                'Monitor Progress',
-                'Check submission status & provide feedback',
+              StreamBuilder<List<GroupModel>>(
+                stream:
+                    context.watch<CoordinatorProvider>().myGroupsStream,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+
+                  if (snapshot.hasError) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Text(
+                        'Failed to load groups: ${snapshot.error}',
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    );
+                  }
+
+                  final groups = snapshot.data ?? <GroupModel>[];
+
+                  if (groups.isEmpty) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Text(
+                        'No groups assigned yet.',
+                        style: TextStyle(
+                          color: AppTheme.textLight,
+                          fontSize: 14,
+                        ),
+                      ),
+                    );
+                  }
+
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: groups.length,
+                    itemBuilder: (context, index) {
+                      final group = groups[index];
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: AppTheme.surface,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                        ),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          title: Text(
+                            group.name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.text,
+                            ),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 2),
+                              Text(
+                                'Dept: ${group.department} • Sem: ${group.semester}',
+                                style: const TextStyle(
+                                  color: AppTheme.textLight,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Members: ${group.memberIds.length}',
+                                style: const TextStyle(
+                                  color: AppTheme.textLight,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
+                          ),
+                          trailing: const Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            size: 16,
+                            color: AppTheme.textLight,
+                          ),
+                          onTap: () {
+                            // Later: navigate to detailed group view / chat / tasks.
+                          },
+                        ),
+                      );
+                    },
+                  );
+                },
               ),
             ],
           ),
@@ -112,87 +147,4 @@ class CoordinatorDashboard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard(
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: color.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: color, size: 28),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: const TextStyle(
-              color: AppTheme.text,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            title,
-            style: const TextStyle(
-              color: AppTheme.textLight,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionTile(IconData icon, String title, String subtitle) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        leading: Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: AppTheme.secondary.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(icon, color: AppTheme.primary),
-        ),
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-            color: AppTheme.text,
-          ),
-        ),
-        subtitle: Text(
-          subtitle,
-          style: const TextStyle(color: AppTheme.textLight, fontSize: 13),
-        ),
-        trailing: const Icon(
-          Icons.arrow_forward_ios_rounded,
-          size: 16,
-          color: AppTheme.textLight,
-        ),
-        onTap: () {},
-      ),
-    );
-  }
 }
