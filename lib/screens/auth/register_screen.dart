@@ -243,7 +243,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 const SizedBox(height: 48),
                 CustomButton(
-                  text: 'Complete Registration',
+                  text: 'Register',
                   isLoading: _isLoading,
                   onPressed: _handleRegister,
                 ),
@@ -314,6 +314,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       children: [
         CustomTextField(
           label: 'Full Name',
+          hint: 'e.g. John Doe',
           controller: _nameController,
           prefixIcon: Icons.person,
           validator: (v) => v!.isEmpty ? 'Name required' : null,
@@ -322,6 +323,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           const SizedBox(height: 16),
           CustomTextField(
             label: 'Roll Number / ID',
+            hint: 'e.g. 21CS001',
             controller: _rollNumberController,
             prefixIcon: Icons.badge,
             validator: (v) => v!.isEmpty ? 'Roll number required' : null,
@@ -329,6 +331,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           const SizedBox(height: 16),
           CustomTextField(
             label: 'Department / Branch',
+            hint: 'e.g. Computer Science',
             controller: _deptController,
             prefixIcon: Icons.business,
             validator: (v) => v!.isEmpty ? 'Department required' : null,
@@ -336,6 +339,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           const SizedBox(height: 16),
           CustomTextField(
             label: 'Year / Semester',
+            hint: 'e.g. 3rd Year / 6th Sem',
             controller: _semesterController,
             prefixIcon: Icons.calendar_today,
             validator: (v) => v!.isEmpty ? 'Semester required' : null,
@@ -344,6 +348,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         const SizedBox(height: 16),
         CustomTextField(
           label: 'Email',
+          hint: 'e.g. john@example.com',
           controller: _emailController,
           prefixIcon: Icons.email,
           validator: (v) => v!.isEmpty ? 'Email required' : null,
@@ -351,6 +356,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         const SizedBox(height: 16),
         CustomTextField(
           label: 'Password',
+          hint: 'Min 6 characters',
           controller: _passwordController,
           isPassword: true,
           prefixIcon: Icons.lock,
@@ -359,6 +365,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         const SizedBox(height: 16),
         CustomTextField(
           label: 'Confirm Password',
+          hint: 'Re-enter password',
           controller: _confirmPasswordController,
           isPassword: true,
           prefixIcon: Icons.lock_reset,
@@ -400,7 +407,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 });
               },
             )),
-        CustomTextField(label: 'Others (Separate by comma)', controller: _othersLanguageController),
+        CustomTextField(
+          label: 'Others (Separate by comma)',
+          hint: 'e.g. Swift, Go, Kotlin',
+          controller: _othersLanguageController,
+        ),
         const SizedBox(height: 24),
         const Text('Rate your proficiency in programming:', style: TextStyle(fontWeight: FontWeight.w600)),
         ...['Beginner', 'Intermediate', 'Advanced'].map((level) => RadioListTile<String>(

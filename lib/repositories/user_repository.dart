@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import '../models/app_user.dart';
 
 class UserRepository {
@@ -19,6 +18,7 @@ class UserRepository {
         );
   }
 
+  Stream<List<AppUser>> getPendingFacultyStream() {
     return _firestore
         .collection('users')
         .where('role', isEqualTo: 'Faculty')
@@ -77,8 +77,6 @@ class UserRepository {
     });
   }
 
-  /// Auto-form groups of 5 students within the same department and semester.
-  /// Students must have role "Student" and not already be in a group (groupId null/empty).
   Future<void> autoFormGroupsForDepartmentSemester({
     required String department,
     required String semester,
@@ -100,13 +98,8 @@ class UserRepository {
       }
     }
 
-    if (candidates.length < 5) {
-      // Not enough students to form even a single group of 5.
-      return;
-    }
+    if (candidates.length < 5) return;
 
-    // Simple skill-based ordering: sort by programming languages so that
-    // students with similar language lists are closer together.
     candidates.sort((a, b) {
       final aLangs = (a.data()['programmingLanguages'] as List?)?.join(',') ?? '';
       final bLangs = (b.data()['programmingLanguages'] as List?)?.join(',') ?? '';
@@ -144,4 +137,3 @@ class UserRepository {
     await batch.commit();
   }
 }
-

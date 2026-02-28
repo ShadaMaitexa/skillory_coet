@@ -1,7 +1,10 @@
 import 'package:flutter/foundation.dart';
 
 import '../models/group.dart';
+import '../models/app_user.dart';
 import '../repositories/user_repository.dart';
+import '../repositories/group_repository.dart';
+import '../repositories/questionnaire_repository.dart';
 
 class CoordinatorProvider extends ChangeNotifier {
   final GroupRepository _groupRepository;

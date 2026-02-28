@@ -3,8 +3,8 @@ import 'package:dio/dio.dart';
 
 class CloudinaryHelper {
   // Constants for Cloudinary (Ideally these should be in a config/env file)
-  static const String cloudName = "dvzq5mv7x"; // Placeholder - you should replace with your cloud name
-  static const String uploadPreset = "skillory_proofs"; // Placeholder - you must create an 'Unsigned' preset in Cloudinary settings
+  static const String cloudName = "dpfhr81ee";
+  static const String uploadPreset = "coet_images";
 
   static Future<String?> uploadFile(File file) async {
     try {
