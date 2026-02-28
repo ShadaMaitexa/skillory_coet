@@ -1,24 +1,29 @@
 import 'package:flutter/foundation.dart';
-
 import '../models/group.dart';
-import '../models/file_meta.dart';
 import '../repositories/group_repository.dart';
 import '../repositories/file_repository.dart';
 
-class GuideProvider extends ChangeNotifier {
+class StudentProvider extends ChangeNotifier {
   final GroupRepository _groupRepository;
   final FileRepository _fileRepository;
 
-  GuideProvider({
+  StudentProvider({
     GroupRepository? groupRepository,
     FileRepository? fileRepository,
   })  : _groupRepository = groupRepository ?? GroupRepository(),
         _fileRepository = fileRepository ?? FileRepository();
 
-  Stream<List<GroupModel>> get myGroupsStream =>
-      _groupRepository.groupsForCurrentGuide();
+  Stream<GroupModel?> get myGroupStream => _groupRepository.groupForCurrentStudent();
 
-  Stream<List<FileMeta>> filesForGroup(String groupId) =>
-      _fileRepository.getFilesForGroup(groupId);
+  Future<void> uploadFile({
+    required String fileName,
+    required String groupId,
+    required String type,
+  }) async {
+    await _fileRepository.addFileRecord(
+      fileName: fileName,
+      groupId: groupId,
+      type: type,
+    );
+  }
 }
-

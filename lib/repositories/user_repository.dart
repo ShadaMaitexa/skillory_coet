@@ -19,11 +19,26 @@ class UserRepository {
         );
   }
 
-  Stream<List<AppUser>> getPendingFacultyStream() {
     return _firestore
         .collection('users')
         .where('role', isEqualTo: 'Faculty')
         .where('status', isEqualTo: 'pending')
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map(
+                (doc) =>
+                    AppUser.fromDocument(doc as DocumentSnapshot<Map<String, dynamic>>),
+              )
+              .toList(),
+        );
+  }
+
+  Stream<List<AppUser>> getApprovedFacultyStream() {
+    return _firestore
+        .collection('users')
+        .where('role', isEqualTo: 'Faculty')
+        .where('status', isEqualTo: 'approved')
         .snapshots()
         .map(
           (snapshot) => snapshot.docs
@@ -90,12 +105,12 @@ class UserRepository {
       return;
     }
 
-    // Simple skill-based ordering: sort by technicalSkills string so that
-    // students with similar skill text are closer together when chunking.
+    // Simple skill-based ordering: sort by programming languages so that
+    // students with similar language lists are closer together.
     candidates.sort((a, b) {
-      final aSkills = (a.data()['technicalSkills'] as String? ?? '').toLowerCase();
-      final bSkills = (b.data()['technicalSkills'] as String? ?? '').toLowerCase();
-      return aSkills.compareTo(bSkills);
+      final aLangs = (a.data()['programmingLanguages'] as List?)?.join(',') ?? '';
+      final bLangs = (b.data()['programmingLanguages'] as List?)?.join(',') ?? '';
+      return aLangs.compareTo(bLangs);
     });
 
     final batch = _firestore.batch();

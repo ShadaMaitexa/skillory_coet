@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_textfield.dart';
-import '../student/student_dashboard.dart';
+import '../student/student_main_screen.dart';
 import '../admin/admin_dashboard.dart';
-import '../faculty/coordinator_dashboard.dart';
-import '../faculty/guide_dashboard.dart';
+import '../faculty/coordinator_main_screen.dart';
+import '../faculty/guide_main_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'register_screen.dart';
@@ -106,16 +106,16 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      Widget nextScreen = const StudentDashboard();
+      Widget nextScreen = const StudentMainScreen();
 
       if (role == 'Faculty') {
         if (specificRole == 'Coordinator') {
-          nextScreen = const CoordinatorDashboard();
+          nextScreen = const CoordinatorMainScreen();
         } else if (specificRole == 'Guide') {
-          nextScreen = const GuideDashboard();
+          nextScreen = const GuideMainScreen();
         } else {
           // Fallback in case specific role isn't appropriately casted
-          nextScreen = const GuideDashboard();
+          nextScreen = const GuideMainScreen();
         }
       }
 

@@ -5,6 +5,7 @@ import '../../models/app_user.dart';
 import '../../providers/admin_provider.dart';
 import '../../theme/app_theme.dart';
 import '../auth/login_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AdminDashboard extends StatelessWidget {
   const AdminDashboard({super.key});
@@ -189,6 +190,22 @@ class AdminDashboard extends StatelessWidget {
                                   fontSize: 13,
                                 ),
                               ),
+                              if (user.proofUrl != null)
+                                TextButton.icon(
+                                  onPressed: () async {
+                                    final url = Uri.parse(user.proofUrl!);
+                                    if (await canLaunchUrl(url)) {
+                                      await launchUrl(url);
+                                    }
+                                  },
+                                  icon: const Icon(Icons.file_present_outlined, size: 14),
+                                  label: const Text('View Proof Document', style: TextStyle(fontSize: 12)),
+                                  style: TextButton.styleFrom(
+                                    padding: EdgeInsets.zero,
+                                    minimumSize: const Size(0, 30),
+                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                ),
                             ],
                           ),
                           trailing: PopupMenuButton<String>(

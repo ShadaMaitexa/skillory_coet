@@ -52,5 +52,46 @@ class GroupRepository {
               .toList(),
         );
   }
+
+  Stream<List<GroupModel>> allGroupsStream() {
+    return _firestore.collection('groups').snapshots().map(
+          (snap) => snap.docs
+              .map(
+                (doc) => GroupModel.fromDocument(
+                  doc as DocumentSnapshot<Map<String, dynamic>>,
+                ),
+              )
+              .toList(),
+        );
+  }
+
+  Stream<GroupModel?> groupForCurrentStudent() {
+    final user = _auth.currentUser;
+    if (user == null) {
+      return Stream.value(null);
+    }
+    return _firestore
+        .collection('groups')
+        .where('memberIds', arrayContains: user.uid)
+        .snapshots()
+        .map((snap) {
+      if (snap.docs.isEmpty) return null;
+      return GroupModel.fromDocument(
+        snap.docs.first as DocumentSnapshot<Map<String, dynamic>>,
+      );
+    });
+  }
+
+  Future<void> assignGuideToGroup(String groupId, String guideId) async {
+    await _firestore.collection('groups').doc(groupId).update({
+      'guideId': guideId,
+    });
+  }
+
+  Future<void> updateGroupStatus(String groupId, String status) async {
+    await _firestore.collection('groups').doc(groupId).update({
+      'status': status,
+    });
+  }
 }
 

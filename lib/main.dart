@@ -8,6 +8,8 @@ import 'screens/auth/login_screen.dart';
 import 'providers/admin_provider.dart';
 import 'providers/coordinator_provider.dart';
 import 'providers/guide_provider.dart';
+import 'providers/student_provider.dart';
+import 'providers/shared_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,6 +34,12 @@ class SkilloryApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => GuideProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => StudentProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => SharedProvider(),
         ),
       ],
       child: MaterialApp(

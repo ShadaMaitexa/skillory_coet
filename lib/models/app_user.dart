@@ -7,12 +7,32 @@ class AppUser {
   final String role;
   final String status;
   final String? specificRole;
+  final String? proofUrl;
+  
+  // Student Specific Fields
+  final String? rollNumber;
   final String? department;
   final String? semester;
   final String? groupId;
-  final String? technicalSkills;
-  final String? interests;
-  final bool? hasExperience;
+  
+  // Section 2: Technical Skills
+  final List<String>? programmingLanguages;
+  final String? codingProficiency;
+  
+  // Section 3: Domain Knowledge
+  final List<String>? domainInterests;
+  final bool? hasWorkedOnProject;
+  final List<String>? previousProjectRoles;
+  
+  // Section 4: Soft Skills
+  final String? teamComfort;
+  final List<String>? preferredTeamRoles;
+  final String? communicationSkills;
+  
+  // Section 5: Tools
+  final List<String>? toolsUsed;
+  final bool? openToLearningNewTools;
+
   final Timestamp? createdAt;
 
   const AppUser({
@@ -22,12 +42,21 @@ class AppUser {
     required this.role,
     required this.status,
     this.specificRole,
+    this.proofUrl,
+    this.rollNumber,
     this.department,
     this.semester,
     this.groupId,
-    this.technicalSkills,
-    this.interests,
-    this.hasExperience,
+    this.programmingLanguages,
+    this.codingProficiency,
+    this.domainInterests,
+    this.hasWorkedOnProject,
+    this.previousProjectRoles,
+    this.teamComfort,
+    this.preferredTeamRoles,
+    this.communicationSkills,
+    this.toolsUsed,
+    this.openToLearningNewTools,
     this.createdAt,
   });
 
@@ -40,14 +69,48 @@ class AppUser {
       role: (data['role'] as String?) ?? 'Student',
       status: (data['status'] as String?) ?? 'pending',
       specificRole: data['specificRole'] as String?,
+      proofUrl: data['proofUrl'] as String?,
+      rollNumber: data['rollNumber'] as String?,
       department: data['department'] as String?,
       semester: data['semester'] as String?,
       groupId: data['groupId'] as String?,
-      technicalSkills: data['technicalSkills'] as String?,
-      interests: data['interests'] as String?,
-      hasExperience: data['hasExperience'] as bool?,
+      programmingLanguages: (data['programmingLanguages'] as List?)?.map((e) => e.toString()).toList(),
+      codingProficiency: data['codingProficiency'] as String?,
+      domainInterests: (data['domainInterests'] as List?)?.map((e) => e.toString()).toList(),
+      hasWorkedOnProject: data['hasWorkedOnProject'] as bool?,
+      previousProjectRoles: (data['previousProjectRoles'] as List?)?.map((e) => e.toString()).toList(),
+      teamComfort: data['teamComfort'] as String?,
+      preferredTeamRoles: (data['preferredTeamRoles'] as List?)?.map((e) => e.toString()).toList(),
+      communicationSkills: data['communicationSkills'] as String?,
+      toolsUsed: (data['toolsUsed'] as List?)?.map((e) => e.toString()).toList(),
+      openToLearningNewTools: data['openToLearningNewTools'] as bool?,
       createdAt: data['createdAt'] as Timestamp?,
     );
   }
-}
 
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'email': email,
+      'role': role,
+      'status': status,
+      'specificRole': specificRole,
+      'proofUrl': proofUrl,
+      'rollNumber': rollNumber,
+      'department': department,
+      'semester': semester,
+      'groupId': groupId,
+      'programmingLanguages': programmingLanguages,
+      'codingProficiency': codingProficiency,
+      'domainInterests': domainInterests,
+      'hasWorkedOnProject': hasWorkedOnProject,
+      'previousProjectRoles': previousProjectRoles,
+      'teamComfort': teamComfort,
+      'preferredTeamRoles': preferredTeamRoles,
+      'communicationSkills': communicationSkills,
+      'toolsUsed': toolsUsed,
+      'openToLearningNewTools': openToLearningNewTools,
+      'createdAt': createdAt ?? FieldValue.serverTimestamp(),
+    };
+  }
+}
