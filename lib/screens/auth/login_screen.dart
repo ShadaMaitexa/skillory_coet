@@ -179,9 +179,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 8),
                       const Text(
-                        'Sign in to find your project partners',
+                        'Find Your Fit',
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 16, color: AppTheme.textLight),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: AppTheme.primary,
+                          letterSpacing: 1.2,
+                        ),
                       ),
                       const SizedBox(height: 48),
                       Form(

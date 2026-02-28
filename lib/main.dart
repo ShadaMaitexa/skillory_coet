@@ -79,22 +79,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Icon(Icons.school_rounded, size: 100, color: Colors.white),
-            SizedBox(height: 24),
-            Text(
-              'Skillory',
-              style: TextStyle(
-                fontSize: 40,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                letterSpacing: -1,
-              ),
+          children: [
+            Image.asset(
+              'assets/icon/logo.png',
+              height: 180,
+              // Color should be preserved from asset, but let's make sure it's centered
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 16),
             const Text(
-              'Perfect Project Partners',
-              style: TextStyle(fontSize: 16, color: Colors.white70),
+              'FIND YOUR FIT',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.white70,
+                letterSpacing: 4,
+              ),
             ),
           ],
         ),
