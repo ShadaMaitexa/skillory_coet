@@ -136,4 +136,16 @@ class UserRepository {
 
     await batch.commit();
   }
+
+  Stream<AppUser?> getUserStream(String uid) {
+    return _firestore.collection('users').doc(uid).snapshots().map(
+          (snapshot) => snapshot.exists
+              ? AppUser.fromDocument(snapshot as DocumentSnapshot<Map<String, dynamic>>)
+              : null,
+        );
+  }
+
+  Future<void> updateProfile(String uid, Map<String, dynamic> data) async {
+    await _firestore.collection('users').doc(uid).update(data);
+  }
 }
