@@ -5,7 +5,7 @@ class AppTheme {
   static const Color primary = Color(0xFFB48C36); // Logo Gold/Bronze
   static const Color secondary = Color(0xFFD4AF37); // Lighter Gold
   static const Color dark = Color(0xFF121212); // Logo Text Charcoal
-  static const Color background = Color(0xFFF9F9F9); // Crisp White/Grey
+  static const Color background = Colors.white; // Crisp White/Grey
   static const Color surface = Colors.white;
   static const Color text = Color(0xFF1A1A1A); // Darker text
   static const Color textLight = Color(0xFF757575); // Grey for captions
