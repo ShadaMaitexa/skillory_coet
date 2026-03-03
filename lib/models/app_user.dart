@@ -8,6 +8,7 @@ class AppUser {
   final String status;
   final String? specificRole;
   final String? proofUrl;
+  final String? photoUrl;
   
   // Student Specific Fields
   final String? rollNumber;
@@ -43,6 +44,7 @@ class AppUser {
     required this.status,
     this.specificRole,
     this.proofUrl,
+    this.photoUrl,
     this.rollNumber,
     this.department,
     this.semester,
@@ -70,6 +72,7 @@ class AppUser {
       status: (data['status'] as String?) ?? 'pending',
       specificRole: data['specificRole'] as String?,
       proofUrl: data['proofUrl'] as String?,
+      photoUrl: data['photoUrl'] as String?,
       rollNumber: data['rollNumber'] as String?,
       department: data['department'] as String?,
       semester: data['semester'] as String?,
@@ -96,6 +99,7 @@ class AppUser {
       'status': status,
       'specificRole': specificRole,
       'proofUrl': proofUrl,
+      'photoUrl': photoUrl,
       'rollNumber': rollNumber,
       'department': department,
       'semester': semester,

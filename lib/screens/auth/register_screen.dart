@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
+import 'dart:async';
 import 'dart:io';
 
 import '../../theme/app_theme.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_textfield.dart';
 import '../../utils/cloudinary_helper.dart';
+import '../../utils/departments_helper.dart';
 import '../../models/app_user.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -28,8 +30,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _rollNumberController = TextEditingController();
-  final _deptController = TextEditingController();
-  final _semesterController = TextEditingController();
+
+  // Department / Semester Dropdowns
+  String? _selectedDept;
+  String? _selectedSem;
+  List<Map<String, dynamic>> _allDepartments = [];
+  StreamSubscription<List<Map<String, dynamic>>>? _deptSub;
 
   // Section 2: Technical Skills
   final List<String> _programmingLanguages = ['C', 'C++', 'Java', 'Python', 'JavaScript'];
@@ -66,14 +72,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isLoading = false;
 
   @override
+  void initState() {
+    super.initState();
+    _deptSub = departmentsStream().listen((data) {
+      if (mounted) setState(() => _allDepartments = data);
+    });
+  }
+
+  @override
   void dispose() {
+    _deptSub?.cancel();
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _rollNumberController.dispose();
-    _deptController.dispose();
-    _semesterController.dispose();
     _othersLanguageController.dispose();
     super.dispose();
   }
@@ -90,6 +103,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     if (_selectedRole == 'Student') {
+      if (_selectedDept == null) {
+        _showError('Please select your department.');
+        return;
+      }
+      if (_selectedSem == null) {
+        _showError('Please select your semester.');
+        return;
+      }
       if (_selectedLanguages.isEmpty && _othersLanguageController.text.isEmpty) {
         _showError('Please select at least one programming language.');
         return;
@@ -152,8 +173,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         status: _selectedRole == 'Student' ? 'approved' : 'pending',
         proofUrl: proofUrl,
         rollNumber: _rollNumberController.text.trim(),
-        department: _deptController.text.trim(),
-        semester: _semesterController.text.trim(),
+        department: _selectedDept,
+        semester: _selectedSem,
         programmingLanguages: finalLanguages,
         codingProficiency: _codingProficiency,
         domainInterests: _selectedDomains,
@@ -329,21 +350,62 @@ class _RegisterScreenState extends State<RegisterScreen> {
             validator: (v) => v!.isEmpty ? 'Roll number required' : null,
           ),
           const SizedBox(height: 16),
-          CustomTextField(
-            label: 'Department / Branch',
-            hint: 'e.g. Computer Science',
-            controller: _deptController,
-            prefixIcon: Icons.business,
-            validator: (v) => v!.isEmpty ? 'Department required' : null,
+          // Department Dropdown
+          DropdownButtonFormField<String>(
+            value: _selectedDept,
+            decoration: InputDecoration(
+              labelText: 'Department / Branch',
+              prefixIcon: const Icon(Icons.business),
+              fillColor: AppTheme.surface,
+              filled: true,
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            hint: _allDepartments.isEmpty
+                ? const Text('Loading departments...')
+                : const Text('Select Department'),
+            items: _allDepartments
+                .map((d) => DropdownMenuItem(
+                      value: d['name'] as String,
+                      child: Text(d['name'] as String),
+                    ))
+                .toList(),
+            onChanged: (v) => setState(() {
+              _selectedDept = v;
+              _selectedSem = null; // reset semester
+            }),
+            validator: (v) => v == null ? 'Department required' : null,
           ),
           const SizedBox(height: 16),
-          CustomTextField(
-            label: 'Year / Semester',
-            hint: 'e.g. 3rd Year / 6th Sem',
-            controller: _semesterController,
-            prefixIcon: Icons.calendar_today,
-            validator: (v) => v!.isEmpty ? 'Semester required' : null,
-          ),
+          // Semester Dropdown (depends on dept)
+          Builder(builder: (context) {
+            final deptData = _allDepartments.firstWhere(
+              (d) => d['name'] == _selectedDept,
+              orElse: () => {},
+            );
+            final semesters = (deptData['semesters'] as List? ?? [])
+                .map((e) => e.toString())
+                .toList();
+            return DropdownButtonFormField<String>(
+              value: _selectedSem,
+              decoration: InputDecoration(
+                labelText: 'Year / Semester',
+                prefixIcon: const Icon(Icons.calendar_today),
+                fillColor: AppTheme.surface,
+                filled: true,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              hint: _selectedDept == null
+                  ? const Text('Select department first')
+                  : const Text('Select Semester'),
+              items: semesters
+                  .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                  .toList(),
+              onChanged: _selectedDept == null
+                  ? null
+                  : (v) => setState(() => _selectedSem = v),
+              validator: (v) => v == null ? 'Semester required' : null,
+            );
+          }),
         ],
         const SizedBox(height: 16),
         CustomTextField(
