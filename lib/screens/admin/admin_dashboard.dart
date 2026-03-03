@@ -210,11 +210,14 @@ class AdminDashboard extends StatelessWidget {
                           ),
                           trailing: PopupMenuButton<String>(
                             onSelected: (role) {
-                              _handleApproveFaculty(
-                                context,
-                                userId: user.id,
-                                specificRole: role,
-                              );
+                                _handleApproveFaculty(
+                                  context,
+                                  userId: user.id,
+                                  specificRole: role,
+                                  facultyName: user.name,
+                                  facultyEmail: user.email,
+                                );
+
                             },
                             itemBuilder: (context) => const [
                               PopupMenuItem(
@@ -554,14 +557,20 @@ class AdminDashboard extends StatelessWidget {
     BuildContext context, {
     required String userId,
     required String specificRole,
+    required String facultyName,
+    required String facultyEmail,
   }) async {
+
     final adminProvider = context.read<AdminProvider>();
 
     try {
       await adminProvider.approveFaculty(
         uid: userId,
         specificRole: specificRole,
+        facultyName: facultyName,
+        facultyEmail: facultyEmail,
       );
+
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
