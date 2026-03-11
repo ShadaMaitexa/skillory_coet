@@ -38,7 +38,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
   StreamSubscription<List<Map<String, dynamic>>>? _deptSub;
 
   // Section 2: Technical Skills
-  final List<String> _programmingLanguages = ['C', 'C++', 'Java', 'Python', 'JavaScript'];
+  final List<String> _programmingLanguages = [
+    'C',
+    'C++',
+    'Java',
+    'Python',
+    'JavaScript'
+  ];
   final List<String> _selectedLanguages = [];
   final _othersLanguageController = TextEditingController();
   String? _codingProficiency; // Beginner, Intermediate, Advanced
@@ -54,17 +60,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
   ];
   final List<String> _selectedDomains = []; // Limit to 2
   bool? _hasWorkedOnProject;
-  final List<String> _prevProjectRoles = ['Programmer', 'Designer', 'Team Leader', 'Documentation', 'Testing'];
+  final List<String> _prevProjectRoles = [
+    'Programmer',
+    'Designer',
+    'Team Leader',
+    'Documentation',
+    'Testing'
+  ];
   final List<String> _selectedPrevRoles = [];
 
   // Section 4: Soft Skills
   String? _teamComfort; // Not comfortable, Comfortable, Very comfortable
-  final List<String> _preferredTeamRoles = ['Team Leader', 'Developer', 'Designer', 'Researcher', 'Documentation'];
+  final List<String> _preferredTeamRoles = [
+    'Team Leader',
+    'Developer',
+    'Designer',
+    'Researcher',
+    'Documentation'
+  ];
   final List<String> _selectedPreferredRoles = [];
   String? _commSkills; // Poor, Average, Good
 
   // Section 5: Tools
-  final List<String> _tools = ['VS Code', 'Git/GitHub', 'MySQL', 'Figma', 'None'];
+  final List<String> _tools = [
+    'VS Code',
+    'Git/GitHub',
+    'MySQL',
+    'Figma',
+    'None'
+  ];
   final List<String> _selectedTools = [];
   bool? _openToLearningNewTools;
 
@@ -111,7 +135,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _showError('Please select your semester.');
         return;
       }
-      if (_selectedLanguages.isEmpty && _othersLanguageController.text.isEmpty) {
+      if (_selectedLanguages.isEmpty &&
+          _othersLanguageController.text.isEmpty) {
         _showError('Please select at least one programming language.');
         return;
       }
@@ -138,6 +163,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (_openToLearningNewTools == null) {
         _showError('Please specify if you are comfortable learning new tools.');
         return;
+      }
+
+      // ── Check semester capacity ──────────────────────────
+      try {
+        final deptDoc = await FirebaseFirestore.instance
+            .collection('departments')
+            .doc(_selectedDept)
+            .get();
+        if (deptDoc.exists) {
+          final rawLimits =
+              deptDoc.data()?['semesterLimits'] as Map<String, dynamic>?;
+          if (rawLimits != null && rawLimits.containsKey(_selectedSem)) {
+            final limit = (rawLimits[_selectedSem] as num).toInt();
+            final countSnap = await FirebaseFirestore.instance
+                .collection('users')
+                .where('role', isEqualTo: 'Student')
+                .where('department', isEqualTo: _selectedDept)
+                .where('semester', isEqualTo: _selectedSem)
+                .get();
+            if (countSnap.docs.length >= limit) {
+              _showError(
+                'Registration closed: $_selectedSem in $_selectedDept has reached '
+                'its maximum capacity of $limit students.',
+              );
+              return;
+            }
+          }
+        }
+      } catch (_) {
+        // If capacity check fails, allow registration to proceed
       }
     } else {
       if (_proofFile == null) {
@@ -234,34 +289,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 32),
                 _buildRoleSelector(),
                 const SizedBox(height: 24),
-                
                 _buildSectionHeader('Section 1: Basic Information'),
                 const SizedBox(height: 16),
                 _buildBasics(),
-                
                 if (_selectedRole == 'Faculty') ...[
-                   const SizedBox(height: 24),
-                   _buildFacultyProof(),
+                  const SizedBox(height: 24),
+                  _buildFacultyProof(),
                 ],
-
                 if (_selectedRole == 'Student') ...[
                   const SizedBox(height: 32),
                   _buildSectionHeader('Section 2: Technical Skills'),
                   _buildTechnicalSkills(),
-
                   const SizedBox(height: 32),
                   _buildSectionHeader('Section 3: Domain Knowledge'),
                   _buildDomainKnowledge(),
-
                   const SizedBox(height: 32),
                   _buildSectionHeader('Section 4: Soft Skills'),
                   _buildSoftSkills(),
-
                   const SizedBox(height: 32),
                   _buildSectionHeader('Section 5: Tools & Learning'),
                   _buildToolsSection(),
                 ],
-
                 const SizedBox(height: 48),
                 CustomButton(
                   text: 'Register',
@@ -314,7 +362,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Registering as:', style: TextStyle(fontWeight: FontWeight.bold)),
+        const Text('Registering as:',
+            style: TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
           value: _selectedRole,
@@ -323,7 +372,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
             filled: true,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
-          items: _roles.map((r) => DropdownMenuItem(value: r, child: Text(r))).toList(),
+          items: _roles
+              .map((r) => DropdownMenuItem(value: r, child: Text(r)))
+              .toList(),
           onChanged: (v) => setState(() => _selectedRole = v!),
         ),
       ],
@@ -358,7 +409,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               prefixIcon: const Icon(Icons.business),
               fillColor: AppTheme.surface,
               filled: true,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             ),
             hint: _allDepartments.isEmpty
                 ? const Text('Loading departments...')
@@ -392,7 +444,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 prefixIcon: const Icon(Icons.calendar_today),
                 fillColor: AppTheme.surface,
                 filled: true,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
               hint: _selectedDept == null
                   ? const Text('Select department first')
@@ -431,7 +484,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
           controller: _confirmPasswordController,
           isPassword: true,
           prefixIcon: Icons.lock_reset,
-          validator: (v) => v != _passwordController.text ? 'Not matching' : null,
+          validator: (v) =>
+              v != _passwordController.text ? 'Not matching' : null,
         ),
       ],
     );
@@ -441,10 +495,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Verification Proof', style: TextStyle(fontWeight: FontWeight.bold)),
+        const Text('Verification Proof',
+            style: TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
-        if (_proofFile != null)
-           Image.file(_proofFile!, height: 100),
+        if (_proofFile != null) Image.file(_proofFile!, height: 100),
         ElevatedButton.icon(
           onPressed: _pickProof,
           icon: const Icon(Icons.upload_file),
@@ -459,13 +513,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
-        const Text('Programming Languages Familiar With:', style: TextStyle(fontWeight: FontWeight.w600)),
+        const Text('Programming Languages Familiar With:',
+            style: TextStyle(fontWeight: FontWeight.w600)),
         ..._programmingLanguages.map((lang) => CheckboxListTile(
               title: Text(lang),
               value: _selectedLanguages.contains(lang),
               onChanged: (v) {
                 setState(() {
-                  v! ? _selectedLanguages.add(lang) : _selectedLanguages.remove(lang);
+                  v!
+                      ? _selectedLanguages.add(lang)
+                      : _selectedLanguages.remove(lang);
                 });
               },
             )),
@@ -475,13 +532,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
           controller: _othersLanguageController,
         ),
         const SizedBox(height: 24),
-        const Text('Rate your proficiency in programming:', style: TextStyle(fontWeight: FontWeight.w600)),
-        ...['Beginner', 'Intermediate', 'Advanced'].map((level) => RadioListTile<String>(
-              title: Text(level),
-              value: level,
-              groupValue: _codingProficiency,
-              onChanged: (v) => setState(() => _codingProficiency = v),
-            )),
+        const Text('Rate your proficiency in programming:',
+            style: TextStyle(fontWeight: FontWeight.w600)),
+        ...['Beginner', 'Intermediate', 'Advanced']
+            .map((level) => RadioListTile<String>(
+                  title: Text(level),
+                  value: level,
+                  groupValue: _codingProficiency,
+                  onChanged: (v) => setState(() => _codingProficiency = v),
+                )),
       ],
     );
   }
@@ -491,19 +550,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
-        const Text('Domains Interested In (Select up to 2):', style: TextStyle(fontWeight: FontWeight.w600)),
+        const Text('Domains Interested In (Select up to 2):',
+            style: TextStyle(fontWeight: FontWeight.w600)),
         ..._domains.map((domain) => CheckboxListTile(
               title: Text(domain),
               value: _selectedDomains.contains(domain),
               onChanged: (v) {
                 if (v! && _selectedDomains.length >= 2) return;
                 setState(() {
-                  v ? _selectedDomains.add(domain) : _selectedDomains.remove(domain);
+                  v
+                      ? _selectedDomains.add(domain)
+                      : _selectedDomains.remove(domain);
                 });
               },
             )),
         const SizedBox(height: 24),
-        const Text('Have you worked on any project before?', style: TextStyle(fontWeight: FontWeight.w600)),
+        const Text('Have you worked on any project before?',
+            style: TextStyle(fontWeight: FontWeight.w600)),
         Row(
           children: [
             Expanded(
@@ -526,13 +589,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
         if (_hasWorkedOnProject == true) ...[
           const SizedBox(height: 16),
-          const Text('Your role in the project(s):', style: TextStyle(fontWeight: FontWeight.w600)),
+          const Text('Your role in the project(s):',
+              style: TextStyle(fontWeight: FontWeight.w600)),
           ..._prevProjectRoles.map((role) => CheckboxListTile(
                 title: Text(role),
                 value: _selectedPrevRoles.contains(role),
                 onChanged: (v) {
                   setState(() {
-                    v! ? _selectedPrevRoles.add(role) : _selectedPrevRoles.remove(role);
+                    v!
+                        ? _selectedPrevRoles.add(role)
+                        : _selectedPrevRoles.remove(role);
                   });
                 },
               )),
@@ -546,26 +612,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
-        const Text('Comfortable working in a team?', style: TextStyle(fontWeight: FontWeight.w600)),
-        ...['Not comfortable', 'Comfortable', 'Very comfortable'].map((val) => RadioListTile<String>(
-              title: Text(val),
-              value: val,
-              groupValue: _teamComfort,
-              onChanged: (v) => setState(() => _teamComfort = v),
-            )),
+        const Text('Comfortable working in a team?',
+            style: TextStyle(fontWeight: FontWeight.w600)),
+        ...['Not comfortable', 'Comfortable', 'Very comfortable']
+            .map((val) => RadioListTile<String>(
+                  title: Text(val),
+                  value: val,
+                  groupValue: _teamComfort,
+                  onChanged: (v) => setState(() => _teamComfort = v),
+                )),
         const SizedBox(height: 24),
-        const Text('Which role do you prefer in a team?', style: TextStyle(fontWeight: FontWeight.w600)),
+        const Text('Which role do you prefer in a team?',
+            style: TextStyle(fontWeight: FontWeight.w600)),
         ..._preferredTeamRoles.map((role) => CheckboxListTile(
               title: Text(role),
               value: _selectedPreferredRoles.contains(role),
               onChanged: (v) {
                 setState(() {
-                  v! ? _selectedPreferredRoles.add(role) : _selectedPreferredRoles.remove(role);
+                  v!
+                      ? _selectedPreferredRoles.add(role)
+                      : _selectedPreferredRoles.remove(role);
                 });
               },
             )),
         const SizedBox(height: 24),
-        const Text('Communication and presentation skills:', style: TextStyle(fontWeight: FontWeight.w600)),
+        const Text('Communication and presentation skills:',
+            style: TextStyle(fontWeight: FontWeight.w600)),
         ...['Poor', 'Average', 'Good'].map((val) => RadioListTile<String>(
               title: Text(val),
               value: val,
@@ -581,7 +653,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
-        const Text('Tools used before:', style: TextStyle(fontWeight: FontWeight.w600)),
+        const Text('Tools used before:',
+            style: TextStyle(fontWeight: FontWeight.w600)),
         ..._tools.map((tool) => CheckboxListTile(
               title: Text(tool),
               value: _selectedTools.contains(tool),
@@ -592,7 +665,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               },
             )),
         const SizedBox(height: 24),
-        const Text('Comfortable learning new tools?', style: TextStyle(fontWeight: FontWeight.w600)),
+        const Text('Comfortable learning new tools?',
+            style: TextStyle(fontWeight: FontWeight.w600)),
         Row(
           children: [
             Expanded(

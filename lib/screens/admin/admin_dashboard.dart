@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -68,6 +69,7 @@ class _AdminDashboardState extends State<AdminDashboard>
               );
 
               if (shouldLogout == true) {
+                if (!context.mounted) return;
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -127,7 +129,8 @@ class _UsersTab extends StatelessWidget {
                   runSpacing: 16,
                   children: [
                     SizedBox(
-                      width: isWide ? (constraints.maxWidth * 0.7 - 16) / 2 : null,
+                      width:
+                          isWide ? (constraints.maxWidth * 0.7 - 16) / 2 : null,
                       child: _buildStatCard(
                         'Total Users',
                         Icons.people_outline,
@@ -136,12 +139,15 @@ class _UsersTab extends StatelessWidget {
                       ),
                     ),
                     SizedBox(
-                      width: isWide ? (constraints.maxWidth * 0.7 - 16) / 2 : null,
+                      width:
+                          isWide ? (constraints.maxWidth * 0.7 - 16) / 2 : null,
                       child: _buildStatCard(
                         'Pending Faculty',
                         Icons.hourglass_bottom_rounded,
                         Colors.orange,
-                        context.watch<AdminProvider>().pendingFacultyCountStream,
+                        context
+                            .watch<AdminProvider>()
+                            .pendingFacultyCountStream,
                       ),
                     ),
                   ],
@@ -182,7 +188,8 @@ class _UsersTab extends StatelessWidget {
                         padding: EdgeInsets.symmetric(vertical: 16),
                         child: Text(
                           'No faculty pending approval.',
-                          style: TextStyle(color: AppTheme.textLight, fontSize: 14),
+                          style: TextStyle(
+                              color: AppTheme.textLight, fontSize: 14),
                         ),
                       );
                     }
@@ -238,7 +245,9 @@ class _UsersTab extends StatelessWidget {
                                         await launchUrl(url);
                                       }
                                     },
-                                    icon: const Icon(Icons.file_present_outlined, size: 14),
+                                    icon: const Icon(
+                                        Icons.file_present_outlined,
+                                        size: 14),
                                     label: const Text(
                                       'View Proof Document',
                                       style: TextStyle(fontSize: 12),
@@ -246,7 +255,8 @@ class _UsersTab extends StatelessWidget {
                                     style: TextButton.styleFrom(
                                       padding: EdgeInsets.zero,
                                       minimumSize: const Size(0, 30),
-                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                      tapTargetSize:
+                                          MaterialTapTargetSize.shrinkWrap,
                                     ),
                                   ),
                               ],
@@ -277,7 +287,8 @@ class _UsersTab extends StatelessWidget {
                                   vertical: 8,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppTheme.primary.withValues(alpha: 0.1),
+                                  color:
+                                      AppTheme.primary.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: const Row(
@@ -342,7 +353,8 @@ class _UsersTab extends StatelessWidget {
                         padding: EdgeInsets.symmetric(vertical: 16),
                         child: Text(
                           'No users found.',
-                          style: TextStyle(color: AppTheme.textLight, fontSize: 14),
+                          style: TextStyle(
+                              color: AppTheme.textLight, fontSize: 14),
                         ),
                       );
                     }
@@ -552,142 +564,386 @@ class _DepartmentsTab extends StatefulWidget {
 class _DepartmentsTabState extends State<_DepartmentsTab> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  // ── ADD DEPARTMENT ───────────────────────────────────────
   Future<void> _showAddDepartmentDialog() async {
     final nameCtrl = TextEditingController();
-    final semCtrl = TextEditingController();
+    // Each entry: {sem: String, limit: TextEditingController}
+    final List<Map<String, dynamic>> semEntries = [];
     final formKey = GlobalKey<FormState>();
 
     await showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Add Department'),
-        content: Form(
-          key: formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: nameCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Department Name',
-                  hintText: 'e.g. Computer Science',
-                  prefixIcon: Icon(Icons.school_outlined),
-                ),
-                validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDlgState) => AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Text('Add Department'),
+          content: SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextFormField(
+                    controller: nameCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'Department Name',
+                      hintText: 'e.g. Computer Science',
+                      prefixIcon: Icon(Icons.school_outlined),
+                    ),
+                    validator: (v) =>
+                        v == null || v.trim().isEmpty ? 'Required' : null,
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          'Semesters & Student Limits',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 14),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.add_circle,
+                            color: AppTheme.primary),
+                        tooltip: 'Add Semester',
+                        onPressed: () {
+                          setDlgState(() {
+                            semEntries.add({
+                              'semCtrl': TextEditingController(),
+                              'limitCtrl': TextEditingController(),
+                            });
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  if (semEntries.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Text(
+                        'Tap + to add semesters',
+                        style: TextStyle(
+                            color: Colors.grey.shade500, fontSize: 13),
+                      ),
+                    ),
+                  ...semEntries.asMap().entries.map((entry) {
+                    final i = entry.key;
+                    final e = entry.value;
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            child: TextFormField(
+                              controller: e['semCtrl'] as TextEditingController,
+                              decoration: InputDecoration(
+                                labelText: 'Semester ${i + 1}',
+                                hintText: 'e.g. 1st Sem',
+                                isDense: true,
+                              ),
+                              validator: (v) => v == null || v.trim().isEmpty
+                                  ? 'Required'
+                                  : null,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            flex: 2,
+                            child: TextFormField(
+                              controller:
+                                  e['limitCtrl'] as TextEditingController,
+                              decoration: const InputDecoration(
+                                labelText: 'Limit',
+                                hintText: '60',
+                                isDense: true,
+                                prefixIcon: Icon(Icons.people, size: 16),
+                              ),
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly
+                              ],
+                              validator: (v) {
+                                if (v == null || v.trim().isEmpty) {
+                                  return 'Required';
+                                }
+                                final n = int.tryParse(v);
+                                if (n == null || n < 1) return 'Invalid';
+                                return null;
+                              },
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.remove_circle_outline,
+                                color: Colors.red, size: 20),
+                            onPressed: () {
+                              setDlgState(() {
+                                (e['semCtrl'] as TextEditingController)
+                                    .dispose();
+                                (e['limitCtrl'] as TextEditingController)
+                                    .dispose();
+                                semEntries.removeAt(i);
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                ],
               ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: semCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Semesters (comma-separated)',
-                  hintText: 'e.g. 1st Sem, 2nd Sem, 3rd Sem',
-                  prefixIcon: Icon(Icons.calendar_month_outlined),
-                ),
-                validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
-              ),
-            ],
+            ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (!formKey.currentState!.validate()) return;
+                if (semEntries.isEmpty) {
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    const SnackBar(content: Text('Add at least one semester.')),
+                  );
+                  return;
+                }
+                final name = nameCtrl.text.trim();
+                final semesters = semEntries
+                    .map((e) =>
+                        (e['semCtrl'] as TextEditingController).text.trim())
+                    .toList();
+                final semesterLimits = <String, int>{};
+                for (final e in semEntries) {
+                  final sem =
+                      (e['semCtrl'] as TextEditingController).text.trim();
+                  final limit = int.parse(
+                      (e['limitCtrl'] as TextEditingController).text.trim());
+                  semesterLimits[sem] = limit;
+                }
+
+                await _firestore.collection('departments').doc(name).set({
+                  'name': name,
+                  'semesters': semesters,
+                  'semesterLimits': semesterLimits,
+                  'createdAt': FieldValue.serverTimestamp(),
+                });
+
+                // Dispose controllers
+                for (final e in semEntries) {
+                  (e['semCtrl'] as TextEditingController).dispose();
+                  (e['limitCtrl'] as TextEditingController).dispose();
+                }
+
+                if (ctx.mounted) Navigator.of(ctx).pop();
+              },
+              child: const Text('Add'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              if (!formKey.currentState!.validate()) return;
-              final name = nameCtrl.text.trim();
-              final semesters = semCtrl.text
-                  .split(',')
-                  .map((s) => s.trim())
-                  .where((s) => s.isNotEmpty)
-                  .toList();
-
-              await _firestore.collection('departments').doc(name).set({
-                'name': name,
-                'semesters': semesters,
-                'createdAt': FieldValue.serverTimestamp(),
-              });
-
-              if (ctx.mounted) Navigator.of(ctx).pop();
-            },
-            child: const Text('Add'),
-          ),
-        ],
       ),
     );
   }
 
+  // ── EDIT DEPARTMENT ──────────────────────────────────────
   Future<void> _showEditDepartmentDialog(
     String docId,
     String currentName,
     List<String> currentSemesters,
+    Map<String, int> currentLimits,
   ) async {
-    final semCtrl = TextEditingController(text: currentSemesters.join(', '));
     final nameCtrl = TextEditingController(text: currentName);
     final formKey = GlobalKey<FormState>();
 
+    // Build editable entries from current semesters + limits
+    final List<Map<String, dynamic>> semEntries = currentSemesters.map((sem) {
+      return {
+        'semCtrl': TextEditingController(text: sem),
+        'limitCtrl':
+            TextEditingController(text: (currentLimits[sem] ?? 60).toString()),
+      };
+    }).toList();
+
     await showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Edit Department'),
-        content: Form(
-          key: formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: nameCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Department Name',
-                  prefixIcon: Icon(Icons.school_outlined),
-                ),
-                validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDlgState) => AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Text('Edit Department'),
+          content: SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextFormField(
+                    controller: nameCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'Department Name',
+                      prefixIcon: Icon(Icons.school_outlined),
+                    ),
+                    validator: (v) =>
+                        v == null || v.trim().isEmpty ? 'Required' : null,
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          'Semesters & Student Limits',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 14),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.add_circle,
+                            color: AppTheme.primary),
+                        tooltip: 'Add Semester',
+                        onPressed: () {
+                          setDlgState(() {
+                            semEntries.add({
+                              'semCtrl': TextEditingController(),
+                              'limitCtrl': TextEditingController(),
+                            });
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  if (semEntries.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Text(
+                        'Tap + to add semesters',
+                        style: TextStyle(
+                            color: Colors.grey.shade500, fontSize: 13),
+                      ),
+                    ),
+                  ...semEntries.asMap().entries.map((entry) {
+                    final i = entry.key;
+                    final e = entry.value;
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            child: TextFormField(
+                              controller: e['semCtrl'] as TextEditingController,
+                              decoration: InputDecoration(
+                                labelText: 'Semester ${i + 1}',
+                                hintText: 'e.g. 1st Sem',
+                                isDense: true,
+                              ),
+                              validator: (v) => v == null || v.trim().isEmpty
+                                  ? 'Required'
+                                  : null,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            flex: 2,
+                            child: TextFormField(
+                              controller:
+                                  e['limitCtrl'] as TextEditingController,
+                              decoration: const InputDecoration(
+                                labelText: 'Limit',
+                                hintText: '60',
+                                isDense: true,
+                                prefixIcon: Icon(Icons.people, size: 16),
+                              ),
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly
+                              ],
+                              validator: (v) {
+                                if (v == null || v.trim().isEmpty) {
+                                  return 'Required';
+                                }
+                                final n = int.tryParse(v);
+                                if (n == null || n < 1) return 'Invalid';
+                                return null;
+                              },
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.remove_circle_outline,
+                                color: Colors.red, size: 20),
+                            onPressed: () {
+                              setDlgState(() {
+                                (e['semCtrl'] as TextEditingController)
+                                    .dispose();
+                                (e['limitCtrl'] as TextEditingController)
+                                    .dispose();
+                                semEntries.removeAt(i);
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                ],
               ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: semCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Semesters (comma-separated)',
-                  prefixIcon: Icon(Icons.calendar_month_outlined),
-                ),
-                validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
-              ),
-            ],
+            ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (!formKey.currentState!.validate()) return;
+                if (semEntries.isEmpty) {
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    const SnackBar(content: Text('Add at least one semester.')),
+                  );
+                  return;
+                }
+                final newName = nameCtrl.text.trim();
+                final semesters = semEntries
+                    .map((e) =>
+                        (e['semCtrl'] as TextEditingController).text.trim())
+                    .toList();
+                final semesterLimits = <String, int>{};
+                for (final e in semEntries) {
+                  final sem =
+                      (e['semCtrl'] as TextEditingController).text.trim();
+                  final limit = int.parse(
+                      (e['limitCtrl'] as TextEditingController).text.trim());
+                  semesterLimits[sem] = limit;
+                }
+
+                if (newName != docId) {
+                  await _firestore
+                      .collection('departments')
+                      .doc(docId)
+                      .delete();
+                }
+                await _firestore.collection('departments').doc(newName).set({
+                  'name': newName,
+                  'semesters': semesters,
+                  'semesterLimits': semesterLimits,
+                  'updatedAt': FieldValue.serverTimestamp(),
+                });
+
+                for (final e in semEntries) {
+                  (e['semCtrl'] as TextEditingController).dispose();
+                  (e['limitCtrl'] as TextEditingController).dispose();
+                }
+
+                if (ctx.mounted) Navigator.of(ctx).pop();
+              },
+              child: const Text('Save'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              if (!formKey.currentState!.validate()) return;
-              final newName = nameCtrl.text.trim();
-              final semesters = semCtrl.text
-                  .split(',')
-                  .map((s) => s.trim())
-                  .where((s) => s.isNotEmpty)
-                  .toList();
-
-              // If name changed, delete old doc and create new
-              if (newName != docId) {
-                await _firestore.collection('departments').doc(docId).delete();
-              }
-              await _firestore.collection('departments').doc(newName).set({
-                'name': newName,
-                'semesters': semesters,
-                'updatedAt': FieldValue.serverTimestamp(),
-              });
-
-              if (ctx.mounted) Navigator.of(ctx).pop();
-            },
-            child: const Text('Save'),
-          ),
-        ],
       ),
     );
   }
@@ -739,8 +995,9 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                       ),
                       SizedBox(height: 4),
                       Text(
-                        'Manage departments & semesters for student registration.',
-                        style: TextStyle(color: AppTheme.textLight, fontSize: 13),
+                        'Manage departments, semesters & student limits.',
+                        style:
+                            TextStyle(color: AppTheme.textLight, fontSize: 13),
                       ),
                     ],
                   ),
@@ -750,8 +1007,10 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                   icon: const Icon(Icons.add, size: 18),
                   label: const Text('Add'),
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 10),
+                    textStyle: const TextStyle(
+                        fontSize: 14, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
@@ -787,8 +1046,8 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                         const Text(
                           'No departments yet.\nTap "Add" to create the first one.',
                           textAlign: TextAlign.center,
-                          style:
-                              TextStyle(color: AppTheme.textLight, fontSize: 15),
+                          style: TextStyle(
+                              color: AppTheme.textLight, fontSize: 15),
                         ),
                       ],
                     ),
@@ -796,14 +1055,23 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                 }
 
                 return ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                   itemCount: docs.length,
                   itemBuilder: (context, index) {
                     final doc = docs[index];
                     final data = doc.data() as Map<String, dynamic>;
                     final name = data['name'] as String? ?? doc.id;
-                    final semesters =
-                        (data['semesters'] as List?)?.map((e) => e.toString()).toList() ?? [];
+                    final semesters = (data['semesters'] as List?)
+                            ?.map((e) => e.toString())
+                            .toList() ??
+                        [];
+                    final rawLimits =
+                        data['semesterLimits'] as Map<String, dynamic>?;
+                    final semesterLimits = rawLimits != null
+                        ? rawLimits
+                            .map((k, v) => MapEntry(k, (v as num).toInt()))
+                        : <String, int>{};
 
                     return Container(
                       margin: const EdgeInsets.only(bottom: 12),
@@ -829,7 +1097,8 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                                 Container(
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: AppTheme.primary.withValues(alpha: 0.1),
+                                    color:
+                                        AppTheme.primary.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: const Icon(
@@ -853,7 +1122,7 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                                   icon: const Icon(Icons.edit_outlined,
                                       color: AppTheme.primary, size: 20),
                                   onPressed: () => _showEditDepartmentDialog(
-                                      doc.id, name, semesters),
+                                      doc.id, name, semesters, semesterLimits),
                                   tooltip: 'Edit',
                                 ),
                                 IconButton(
@@ -867,7 +1136,7 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                             if (semesters.isNotEmpty) ...[
                               const SizedBox(height: 12),
                               const Text(
-                                'Semesters:',
+                                'Semesters & Limits:',
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
@@ -876,32 +1145,15 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 6,
-                                children: semesters
-                                    .map(
-                                      (sem) => Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 10, vertical: 4),
-                                        decoration: BoxDecoration(
-                                          color: AppTheme.primary.withValues(alpha: 0.08),
-                                          borderRadius: BorderRadius.circular(20),
-                                          border: Border.all(
-                                              color: AppTheme.primary.withValues(alpha: 0.3)),
-                                        ),
-                                        child: Text(
-                                          sem,
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            color: AppTheme.primary,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                    .toList(),
-                              ),
+                              // Show each semester with its registered count vs limit
+                              ...semesters.map((sem) {
+                                final limit = semesterLimits[sem] ?? 0;
+                                return _SemesterCapacityRow(
+                                  department: name,
+                                  semester: sem,
+                                  limit: limit,
+                                );
+                              }),
                             ],
                           ],
                         ),
@@ -914,6 +1166,103 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// A row that shows the live student count vs the limit for a given dept+sem
+class _SemesterCapacityRow extends StatelessWidget {
+  final String department;
+  final String semester;
+  final int limit;
+
+  const _SemesterCapacityRow({
+    required this.department,
+    required this.semester,
+    required this.limit,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .where('role', isEqualTo: 'Student')
+          .where('department', isEqualTo: department)
+          .where('semester', isEqualTo: semester)
+          .snapshots(),
+      builder: (context, snapshot) {
+        final count = snapshot.data?.docs.length ?? 0;
+        final isFull = limit > 0 && count >= limit;
+        final progress = limit > 0 ? (count / limit).clamp(0.0, 1.0) : 0.0;
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: isFull
+                          ? Colors.red.withValues(alpha: 0.1)
+                          : AppTheme.primary.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isFull
+                            ? Colors.red.withValues(alpha: 0.4)
+                            : AppTheme.primary.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Text(
+                      semester,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isFull ? Colors.red : AppTheme.primary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '$count / $limit students',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isFull ? Colors.red : AppTheme.textLight,
+                      fontWeight: isFull ? FontWeight.w600 : FontWeight.normal,
+                    ),
+                  ),
+                  if (isFull) ...[
+                    const SizedBox(width: 4),
+                    const Icon(Icons.lock, size: 13, color: Colors.red),
+                    const SizedBox(width: 2),
+                    const Text(
+                      'Full',
+                      style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 4),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 5,
+                  backgroundColor: Colors.grey.shade200,
+                  color: isFull ? Colors.red : AppTheme.primary,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -942,7 +1291,7 @@ class _GroupsTab extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             const Text(
-              'Automatically group students by department and semester.',
+              'Groups of 5 are formed automatically based on student skills when a semester is full.',
               style: TextStyle(color: AppTheme.textLight, fontSize: 13),
             ),
             const SizedBox(height: 32),
@@ -973,6 +1322,7 @@ class _AutoFormGroupsCardState extends State<_AutoFormGroupsCard> {
         final depts = allDepts.map((d) => d['name'] as String? ?? '').toList();
 
         List<String> semesters = [];
+        Map<String, int> semesterLimits = {};
         if (_selectedDept != null) {
           final deptData = allDepts.firstWhere(
             (d) => d['name'] == _selectedDept,
@@ -981,6 +1331,11 @@ class _AutoFormGroupsCardState extends State<_AutoFormGroupsCard> {
           semesters = (deptData['semesters'] as List? ?? [])
               .map((e) => e.toString())
               .toList();
+          final rawLimits = deptData['semesterLimits'] as Map<String, dynamic>?;
+          if (rawLimits != null) {
+            semesterLimits =
+                rawLimits.map((k, v) => MapEntry(k, (v as num).toInt()));
+          }
         }
 
         // Reset semester if not in new list
@@ -1048,27 +1403,26 @@ class _AutoFormGroupsCardState extends State<_AutoFormGroupsCard> {
                     ? null
                     : (v) => setState(() => _selectedSem = v),
               ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed:
-                      _isLoading || _selectedDept == null || _selectedSem == null
-                          ? null
-                          : () => _autoForm(context),
-                  icon: _isLoading
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : const Icon(Icons.group_add_rounded),
-                  label: Text(_isLoading ? 'Forming...' : 'Auto Form Groups'),
+              const SizedBox(height: 20),
+
+              // ── Capacity status & Generate button ──────────────
+              if (_selectedDept != null && _selectedSem != null)
+                _GenerateGroupsSection(
+                  department: _selectedDept!,
+                  semester: _selectedSem!,
+                  limit: semesterLimits[_selectedSem] ?? 0,
+                  isLoading: _isLoading,
+                  onGenerate: () => _autoForm(),
+                )
+              else
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: null,
+                    icon: const Icon(Icons.group_add_rounded),
+                    label: const Text('Generate Groups'),
+                  ),
                 ),
-              ),
             ],
           ),
         );
@@ -1076,7 +1430,7 @@ class _AutoFormGroupsCardState extends State<_AutoFormGroupsCard> {
     );
   }
 
-  Future<void> _autoForm(BuildContext context) async {
+  Future<void> _autoForm() async {
     setState(() => _isLoading = true);
     try {
       await context.read<AdminProvider>().autoFormGroups(
@@ -1086,7 +1440,8 @@ class _AutoFormGroupsCardState extends State<_AutoFormGroupsCard> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('Groups formed successfully (where possible).')),
+              content:
+                  Text('Groups of 5 formed successfully based on skills!')),
         );
       }
     } catch (e) {
@@ -1098,5 +1453,137 @@ class _AutoFormGroupsCardState extends State<_AutoFormGroupsCard> {
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+}
+
+/// Shows live capacity and enables Generate button only when semester is full
+class _GenerateGroupsSection extends StatelessWidget {
+  final String department;
+  final String semester;
+  final int limit;
+  final bool isLoading;
+  final VoidCallback onGenerate;
+
+  const _GenerateGroupsSection({
+    required this.department,
+    required this.semester,
+    required this.limit,
+    required this.isLoading,
+    required this.onGenerate,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .where('role', isEqualTo: 'Student')
+          .where('department', isEqualTo: department)
+          .where('semester', isEqualTo: semester)
+          .snapshots(),
+      builder: (context, snapshot) {
+        final count = snapshot.data?.docs.length ?? 0;
+        final isFull = limit > 0 && count >= limit;
+        final progress = limit > 0 ? (count / limit).clamp(0.0, 1.0) : 0.0;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Capacity card
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: isFull ? Colors.green.shade50 : Colors.orange.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color:
+                      isFull ? Colors.green.shade200 : Colors.orange.shade200,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        isFull ? Icons.check_circle : Icons.hourglass_top,
+                        color: isFull ? Colors.green : Colors.orange,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        isFull
+                            ? 'Semester is full — ready to generate groups!'
+                            : 'Waiting for semester to fill up',
+                        style: TextStyle(
+                          color: isFull
+                              ? Colors.green.shade700
+                              : Colors.orange.shade700,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: progress,
+                            minHeight: 7,
+                            backgroundColor: Colors.grey.shade200,
+                            color: isFull ? Colors.green : Colors.orange,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        '$count / $limit',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: isFull
+                              ? Colors.green.shade700
+                              : Colors.orange.shade700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                // Only enabled when semester is full AND not already loading
+                onPressed: (isFull && !isLoading) ? onGenerate : null,
+                icon: isLoading
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Icon(Icons.group_add_rounded),
+                label: Text(isLoading
+                    ? 'Forming...'
+                    : isFull
+                        ? 'Generate Groups (5 per group)'
+                        : 'Generate Groups (Semester not full yet)'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isFull ? AppTheme.primary : Colors.grey,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

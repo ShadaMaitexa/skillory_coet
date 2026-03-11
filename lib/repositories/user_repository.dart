@@ -11,8 +11,8 @@ class UserRepository {
     return _firestore.collection('users').snapshots().map(
           (snapshot) => snapshot.docs
               .map(
-                (doc) =>
-                    AppUser.fromDocument(doc as DocumentSnapshot<Map<String, dynamic>>),
+                (doc) => AppUser.fromDocument(
+                    doc as DocumentSnapshot<Map<String, dynamic>>),
               )
               .toList(),
         );
@@ -27,8 +27,8 @@ class UserRepository {
         .map(
           (snapshot) => snapshot.docs
               .map(
-                (doc) =>
-                    AppUser.fromDocument(doc as DocumentSnapshot<Map<String, dynamic>>),
+                (doc) => AppUser.fromDocument(
+                    doc as DocumentSnapshot<Map<String, dynamic>>),
               )
               .toList(),
         );
@@ -43,8 +43,8 @@ class UserRepository {
         .map(
           (snapshot) => snapshot.docs
               .map(
-                (doc) =>
-                    AppUser.fromDocument(doc as DocumentSnapshot<Map<String, dynamic>>),
+                (doc) => AppUser.fromDocument(
+                    doc as DocumentSnapshot<Map<String, dynamic>>),
               )
               .toList(),
         );
@@ -98,25 +98,68 @@ class UserRepository {
       }
     }
 
-    if (candidates.length < 5) return;
+    if (candidates.length < 5) {
+      return;
+    }
 
-    candidates.sort((a, b) {
-      final aLangs = (a.data()['programmingLanguages'] as List?)?.join(',') ?? '';
-      final bLangs = (b.data()['programmingLanguages'] as List?)?.join(',') ?? '';
-      return aLangs.compareTo(bLangs);
-    });
+    // ── Skill-based scoring for balanced group formation ──
+    // Score = codingProficiency (0-2) + domainInterests count + tools count
+    int skillScore(Map<String, dynamic> data) {
+      int score = 0;
+      final prof = data['codingProficiency'] as String?;
+      if (prof == 'Advanced') {
+        score += 3;
+      } else if (prof == 'Intermediate') {
+        score += 2;
+      } else if (prof == 'Beginner') {
+        score += 1;
+      }
+
+      final domains = (data['domainInterests'] as List?)?.length ?? 0;
+      score += domains;
+
+      final langs = (data['programmingLanguages'] as List?)?.length ?? 0;
+      score += langs;
+
+      final tools =
+          (data['toolsUsed'] as List?)?.where((t) => t != 'None').length ?? 0;
+      score += tools;
+
+      if (data['hasWorkedOnProject'] == true) score += 2;
+      return score;
+    }
+
+    // Sort by skill score descending
+    candidates
+        .sort((a, b) => skillScore(b.data()).compareTo(skillScore(a.data())));
+
+    // Distribute using snake/round-robin pattern for skill diversity:
+    // Group them into groups of 5 by round-robin so each group gets
+    // a mix of high, medium, and low scorers.
+    final groupCount = candidates.length ~/ 5;
+    final List<List<QueryDocumentSnapshot<Map<String, dynamic>>>> groups =
+        List.generate(groupCount, (_) => []);
+
+    for (int i = 0; i < candidates.length && i < groupCount * 5; i++) {
+      // Snake: 0,1,2,...,groupCount-1,groupCount-1,...,1,0,0,1,...
+      final roundIndex = i ~/ groupCount;
+      final posInRound = i % groupCount;
+      final groupIdx =
+          roundIndex.isEven ? posInRound : (groupCount - 1 - posInRound);
+      groups[groupIdx].add(candidates[i]);
+    }
 
     final batch = _firestore.batch();
-    int groupIndex = 1;
 
-    for (int i = 0; i + 4 < candidates.length; i += 5) {
-      final slice = candidates.sublist(i, i + 5);
+    for (int g = 0; g < groups.length; g++) {
+      final slice = groups[g];
+      if (slice.length < 5) continue; // skip incomplete groups
+
       final memberIds = slice.map((d) => d.id).toList();
-
       final groupDoc = _firestore.collection('groups').doc();
 
       batch.set(groupDoc, {
-        'name': '$department-$semester-Group-$groupIndex',
+        'name': '$department-$semester-Group-${g + 1}',
         'department': department,
         'semester': semester,
         'memberIds': memberIds,
@@ -130,8 +173,6 @@ class UserRepository {
           'groupId': groupDoc.id,
         });
       }
-
-      groupIndex++;
     }
 
     await batch.commit();
@@ -140,7 +181,7 @@ class UserRepository {
   Stream<AppUser?> getUserStream(String uid) {
     return _firestore.collection('users').doc(uid).snapshots().map(
           (snapshot) => snapshot.exists
-              ? AppUser.fromDocument(snapshot as DocumentSnapshot<Map<String, dynamic>>)
+              ? AppUser.fromDocument(snapshot)
               : null,
         );
   }
