@@ -33,6 +33,7 @@ class AppUser {
   // Section 5: Tools
   final List<String>? toolsUsed;
   final bool? openToLearningNewTools;
+  final List<String> savedProjectIds;
 
   final Timestamp? createdAt;
 
@@ -59,6 +60,7 @@ class AppUser {
     this.communicationSkills,
     this.toolsUsed,
     this.openToLearningNewTools,
+    this.savedProjectIds = const [],
     this.createdAt,
   });
 
@@ -87,6 +89,7 @@ class AppUser {
       communicationSkills: data['communicationSkills'] as String?,
       toolsUsed: (data['toolsUsed'] as List?)?.map((e) => e.toString()).toList(),
       openToLearningNewTools: data['openToLearningNewTools'] as bool?,
+      savedProjectIds: (data['savedProjectIds'] as List?)?.map((e) => e.toString()).toList() ?? [],
       createdAt: data['createdAt'] as Timestamp?,
     );
   }
@@ -114,6 +117,7 @@ class AppUser {
       'communicationSkills': communicationSkills,
       'toolsUsed': toolsUsed,
       'openToLearningNewTools': openToLearningNewTools,
+      'savedProjectIds': savedProjectIds,
       'createdAt': createdAt ?? FieldValue.serverTimestamp(),
     };
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../shared/activity_screen.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/coordinator_provider.dart';
 import '../../models/group.dart';
@@ -13,6 +14,17 @@ class CoordinatorMonitoringScreen extends StatelessWidget {
       backgroundColor: AppTheme.background,
       appBar: AppBar(
         title: const Text('Overall Monitoring'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_none_outlined, color: AppTheme.dark),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ActivityScreen()),
+              );
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),

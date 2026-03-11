@@ -8,6 +8,9 @@ class GroupModel {
   final List<String> memberIds;
   final String guideId;
   final String coordinatorId;
+  final String projectTitle;
+  final String projectDescription;
+  final List<String> projectTechStack;
   final Timestamp? createdAt;
 
   const GroupModel({
@@ -18,6 +21,9 @@ class GroupModel {
     required this.memberIds,
     required this.guideId,
     required this.coordinatorId,
+    this.projectTitle = '',
+    this.projectDescription = '',
+    this.projectTechStack = const [],
     this.createdAt,
   });
 
@@ -33,6 +39,11 @@ class GroupModel {
           .toList(),
       guideId: (data['guideId'] as String?) ?? '',
       coordinatorId: (data['coordinatorId'] as String?) ?? '',
+      projectTitle: (data['projectTitle'] as String?) ?? '',
+      projectDescription: (data['projectDescription'] as String?) ?? '',
+      projectTechStack: (data['projectTechStack'] as List<dynamic>? ?? const [])
+          .map((e) => e.toString())
+          .toList(),
       createdAt: data['createdAt'] as Timestamp?,
     );
   }

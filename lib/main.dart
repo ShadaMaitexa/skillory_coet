@@ -10,6 +10,7 @@ import 'providers/coordinator_provider.dart';
 import 'providers/guide_provider.dart';
 import 'providers/student_provider.dart';
 import 'providers/shared_provider.dart';
+import 'providers/activity_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,6 +41,9 @@ class SkilloryApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => SharedProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ActivityProvider(),
         ),
       ],
       child: MaterialApp(

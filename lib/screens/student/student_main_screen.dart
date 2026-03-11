@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
-import 'student_dashboard.dart';
 import 'upload_files_screen.dart';
 import '../shared/chat_list_screen.dart';
 import '../shared/profile_screen.dart';
-import 'package:provider/provider.dart';
 import '../../providers/student_provider.dart';
+import 'package:provider/provider.dart';
 import '../../models/group.dart';
+import '../../models/app_user.dart';
 import '../shared/project_details_screen.dart';
+import '../shared/chat_room_screen.dart';
+import '../shared/activity_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../providers/shared_provider.dart';
 
 class StudentMainScreen extends StatefulWidget {
   const StudentMainScreen({super.key});
@@ -19,13 +22,22 @@ class StudentMainScreen extends StatefulWidget {
 
 class _StudentMainScreenState extends State<StudentMainScreen> {
   int _currentIndex = 0;
+  late List<Widget> _screens;
 
-  final List<Widget> _screens = [
-    const StudentDashboardContent(),
-    const UploadFilesScreen(),
-    const ChatListScreen(),
-    const ProfileScreen(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _screens = [
+      StudentDashboardContent(onTabChange: (index) {
+        setState(() {
+          _currentIndex = index;
+        });
+      }),
+      const ChatListScreen(),
+      const UploadFilesScreen(),
+      const ProfileScreen(),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,22 +78,22 @@ class _StudentMainScreenState extends State<StudentMainScreen> {
             ),
             items: const [
               BottomNavigationBarItem(
-                icon: Icon(Icons.grid_view_outlined),
-                activeIcon: Icon(Icons.grid_view_rounded),
+                icon: Icon(Icons.dashboard_outlined),
+                activeIcon: Icon(Icons.dashboard_rounded),
                 label: 'Home',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.file_upload_outlined),
-                activeIcon: Icon(Icons.file_upload_rounded),
-                label: 'Files',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.forum_outlined),
-                activeIcon: Icon(Icons.forum_rounded),
+                icon: Icon(Icons.chat_bubble_outline_rounded),
+                activeIcon: Icon(Icons.chat_bubble_rounded),
                 label: 'Chat',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.person_outline),
+                icon: Icon(Icons.cloud_upload_outlined),
+                activeIcon: Icon(Icons.cloud_upload_rounded),
+                label: 'Upload',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person_outline_rounded),
                 activeIcon: Icon(Icons.person_rounded),
                 label: 'Profile',
               ),
@@ -95,7 +107,8 @@ class _StudentMainScreenState extends State<StudentMainScreen> {
 
 // Extract content from StudentDashboard for reusability
 class StudentDashboardContent extends StatelessWidget {
-  const StudentDashboardContent({super.key});
+  final Function(int) onTabChange;
+  const StudentDashboardContent({super.key, required this.onTabChange});
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +116,18 @@ class StudentDashboardContent extends StatelessWidget {
       backgroundColor: AppTheme.background,
       appBar: AppBar(
         title: const Text('Student Dashboard'),
-        automaticallyImplyLeading: false, // Remove back arrow if necessary
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_none_outlined, color: AppTheme.dark),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ActivityScreen()),
+              );
+            },
+          ),
+        ],
       ),
       body: SafeArea(
         child: StreamBuilder<GroupModel?>(
@@ -114,82 +138,75 @@ class StudentDashboardContent extends StatelessWidget {
             }
 
             final group = snapshot.data;
-            final user = FirebaseAuth.instance.currentUser;
 
             return LayoutBuilder(
               builder: (context, constraints) {
-                final isWide = constraints.maxWidth > 700;
-                final horizontalPadding =
-                    isWide ? constraints.maxWidth * 0.15 : 24.0;
-                final cardWidth = isWide
-                    ? (constraints.maxWidth * 0.7 - 24) / 2
-                    : constraints.maxWidth;
-
                 return SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: horizontalPadding,
-                    vertical: 24,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Welcome Section
                       Container(
                         padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
-                          color: AppTheme.surface,
-                          borderRadius: BorderRadius.circular(20),
+                          color: AppTheme.primary,
+                          borderRadius: BorderRadius.circular(24),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.03),
-                              blurRadius: 15,
-                              offset: const Offset(0, 5),
+                              color: AppTheme.primary.withOpacity(0.3),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
                             ),
                           ],
                         ),
-                        child: Row(
-                          children: [
-                            CircleAvatar(
-                              radius: 30,
-                              backgroundColor:
-                                  AppTheme.primary.withOpacity(0.1),
-                              child: const Icon(
-                                Icons.person,
-                                size: 36,
-                                color: AppTheme.primary,
+                        child: StreamBuilder<AppUser?>(
+                          stream: context.read<SharedProvider>().getUserStream(
+                                FirebaseAuth.instance.currentUser?.uid ?? '',
                               ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Welcome, ${user?.displayName ?? 'Student'}!',
-                                    style: const TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppTheme.dark,
-                                    ),
+                          builder: (context, userSnap) {
+                            final userName = userSnap.data?.name ?? 'Student';
+                            return Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 30,
+                                  backgroundColor: Colors.white.withOpacity(0.2),
+                                  child: const Icon(Icons.person,
+                                      color: Colors.white, size: 30),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Welcome back,',
+                                        style: TextStyle(
+                                          color: Colors.white.withOpacity(0.8),
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      Text(
+                                        userName,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    group != null
-                                        ? 'Group: ${group.name} • ${group.department}'
-                                        : 'Not assigned to any group yet',
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: AppTheme.textLight,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                                ),
+                              ],
+                            );
+                          },
                         ),
                       ),
+
                       const SizedBox(height: 32),
+
                       const Text(
-                        'My Activities',
+                        'Project Information',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -197,51 +214,57 @@ class StudentDashboardContent extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      Wrap(
-                        spacing: 12,
-                        runSpacing: 12,
-                        children: [
-                          SizedBox(
-                            width: cardWidth,
-                            child: _buildFeatureCard(
-                              Icons.group_work_outlined,
-                              'Project Dashboard',
-                              group != null
-                                  ? 'View group details'
-                                  : 'Join a group first',
-                              const Color(0xFF3B82F6),
-                              onTap: group != null
-                                  ? () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) =>
-                                              ProjectDetailsScreen(group: group),
-                                        ),
-                                      );
-                                    }
-                                  : null,
-                            ),
-                          ),
-                          SizedBox(
-                            width: cardWidth,
-                            child: _buildFeatureCard(
-                              Icons.chat_outlined,
-                              'Group Chat',
-                              'Communicate with team',
-                              const Color(0xFF10B981),
-                            ),
-                          ),
-                          SizedBox(
-                            width: cardWidth,
-                            child: _buildFeatureCard(
-                              Icons.cloud_upload_outlined,
-                              'Upload Work',
-                              'Submit deliverables',
-                              AppTheme.primary,
-                            ),
-                          ),
-                        ],
+
+                      if (group != null) ...[
+                        _buildFeatureCard(
+                          title: 'Project Dashboard',
+                          subtitle: group.name,
+                          icon: Icons.rocket_launch_outlined,
+                          color: const Color(0xFF6366F1),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ProjectDetailsScreen(group: group),
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        _buildFeatureCard(
+                          title: 'Group Chat',
+                          subtitle: 'Connect with your team',
+                          icon: Icons.chat_bubble_outline_rounded,
+                          color: const Color(0xFF10B981),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ChatRoomScreen(
+                                  groupId: group.id,
+                                  groupName: group.name,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ] else ...[
+                        _buildFeatureCard(
+                          title: 'Team Formation',
+                          subtitle: 'Pending group assignment',
+                          icon: Icons.group_add_outlined,
+                          color: const Color(0xFFF59E0B),
+                          onTap: () {},
+                        ),
+                      ],
+
+                      const SizedBox(height: 16),
+                      _buildFeatureCard(
+                        title: 'Upload Work',
+                        subtitle: 'Submit your progress',
+                        icon: Icons.cloud_upload_outlined,
+                        color: const Color(0xFF3B82F6),
+                        onTap: () => onTabChange(2), // Switch to upload tab
                       ),
                     ],
                   ),
@@ -254,26 +277,26 @@ class StudentDashboardContent extends StatelessWidget {
     );
   }
 
-  Widget _buildFeatureCard(
-    IconData icon,
-    String title,
-    String subtitle,
-    Color color, {
-    VoidCallback? onTap,
+  Widget _buildFeatureCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
   }) {
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.1)),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
           onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(20),
             child: Row(
               children: [
                 Container(
@@ -284,7 +307,7 @@ class StudentDashboardContent extends StatelessWidget {
                   ),
                   child: Icon(icon, color: color, size: 28),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 20),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -292,9 +315,9 @@ class StudentDashboardContent extends StatelessWidget {
                       Text(
                         title,
                         style: const TextStyle(
-                          fontSize: 16,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: AppTheme.text,
+                          color: AppTheme.dark,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -308,6 +331,7 @@ class StudentDashboardContent extends StatelessWidget {
                     ],
                   ),
                 ),
+                Icon(Icons.chevron_right_rounded, color: color.withOpacity(0.5)),
               ],
             ),
           ),

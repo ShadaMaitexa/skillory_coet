@@ -58,6 +58,9 @@ class ProfileScreen extends StatelessWidget {
                 _buildInfoCard([
                   _buildInfoItem(Icons.email_outlined, 'Email', appUser.email),
                   _buildInfoItem(Icons.badge_outlined, 'Role', appUser.role),
+                  if (appUser.department != null)
+                    _buildInfoItem(
+                        Icons.business_outlined, 'Department', appUser.department!),
                   if (appUser.specificRole != null)
                     _buildInfoItem(
                         Icons.stars_outlined, 'Specialization', appUser.specificRole!),
@@ -371,6 +374,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           'department': _selectedDept,
           'semester': _selectedSem,
         },
+        if (widget.user.role == 'Faculty') ...{
+          'department': _selectedDept,
+        },
       };
 
       await context.read<SharedProvider>().updateProfile(widget.user.id, updates);
@@ -533,6 +539,32 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   }),
                   validator: (v) => v == null ? 'Department required' : null,
                 ),
+              ],
+              if (widget.user.role == 'Faculty') ...[
+                const SizedBox(height: 20),
+                DropdownButtonFormField<String>(
+                  value: _selectedDept,
+                  decoration: InputDecoration(
+                    labelText: 'Department / Branch',
+                    prefixIcon: const Icon(Icons.business_outlined),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  hint: _allDepartments.isEmpty
+                      ? const Text('Loading...')
+                      : const Text('Select Department'),
+                  items: _allDepartments
+                      .map((d) => DropdownMenuItem(
+                            value: d['name'] as String,
+                            child: Text(d['name'] as String),
+                          ))
+                      .toList(),
+                  onChanged: (v) => setState(() => _selectedDept = v),
+                  validator: (v) => v == null ? 'Department required' : null,
+                ),
+              ],
+              if (widget.user.role == 'Student') ...[
                 const SizedBox(height: 20),
 
                 // Semester dropdown

@@ -391,15 +391,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           prefixIcon: Icons.person,
           validator: (v) => v!.isEmpty ? 'Name required' : null,
         ),
-        if (_selectedRole == 'Student') ...[
-          const SizedBox(height: 16),
-          CustomTextField(
-            label: 'Roll Number / ID',
-            hint: 'e.g. 21CS001',
-            controller: _rollNumberController,
-            prefixIcon: Icons.badge,
-            validator: (v) => v!.isEmpty ? 'Roll number required' : null,
-          ),
+        if (_selectedRole == 'Student' || _selectedRole == 'Faculty') ...[
           const SizedBox(height: 16),
           // Department Dropdown
           DropdownButtonFormField<String>(
@@ -426,6 +418,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
               _selectedSem = null; // reset semester
             }),
             validator: (v) => v == null ? 'Department required' : null,
+          ),
+        ],
+        if (_selectedRole == 'Student') ...[
+          const SizedBox(height: 16),
+          CustomTextField(
+            label: 'Roll Number / ID',
+            hint: 'e.g. 21CS001',
+            controller: _rollNumberController,
+            prefixIcon: Icons.badge,
+            validator: (v) => v!.isEmpty ? 'Roll number required' : null,
           ),
           const SizedBox(height: 16),
           // Semester Dropdown (depends on dept)

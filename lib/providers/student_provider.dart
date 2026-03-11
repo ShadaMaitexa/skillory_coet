@@ -26,4 +26,19 @@ class StudentProvider extends ChangeNotifier {
       type: type,
     );
   }
+
+  Future<void> updateProjectDetails({
+    required String groupId,
+    required String title,
+    required String description,
+    required List<String> techStack,
+  }) async {
+    await _groupRepository.updateProjectDetails(
+      groupId: groupId,
+      title: title,
+      description: description,
+      techStack: techStack,
+    );
+    notifyListeners();
+  }
 }

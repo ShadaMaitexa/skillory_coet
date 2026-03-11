@@ -149,6 +149,20 @@ class UserRepository {
       groups[groupIdx].add(candidates[i]);
     }
 
+    // ── Find Coordinator for this department ──
+    String coordinatorId = '';
+    final coordSnap = await _firestore
+        .collection('users')
+        .where('role', isEqualTo: 'Faculty')
+        .where('specificRole', isEqualTo: 'Coordinator')
+        .where('department', isEqualTo: department)
+        .limit(1)
+        .get();
+    
+    if (coordSnap.docs.isNotEmpty) {
+      coordinatorId = coordSnap.docs.first.id;
+    }
+
     final batch = _firestore.batch();
 
     for (int g = 0; g < groups.length; g++) {
@@ -164,7 +178,7 @@ class UserRepository {
         'semester': semester,
         'memberIds': memberIds,
         'guideId': '',
-        'coordinatorId': '',
+        'coordinatorId': coordinatorId,
         'createdAt': FieldValue.serverTimestamp(),
       });
 
@@ -176,6 +190,35 @@ class UserRepository {
     }
 
     await batch.commit();
+
+    // ── Send Notifications ──
+    for (int g = 0; g < groups.length; g++) {
+      final slice = groups[g];
+      if (slice.length < 5) continue;
+      final groupName = '$department-$semester-Group-${g + 1}';
+
+      for (final student in slice) {
+        await _firestore.collection('activities').add({
+          'userId': student.id,
+          'title': 'Group Formed!',
+          'message': 'You have been assigned to $groupName. Check your dashboard for details.',
+          'type': 'group_formed',
+          'timestamp': FieldValue.serverTimestamp(),
+          'isRead': false,
+        });
+      }
+    }
+
+    if (coordinatorId.isNotEmpty) {
+      await _firestore.collection('activities').add({
+        'userId': coordinatorId,
+        'title': 'Groups Formed',
+        'message': 'New groups formed for $department, Semester $semester.',
+        'type': 'group_formed',
+        'timestamp': FieldValue.serverTimestamp(),
+        'isRead': false,
+      });
+    }
   }
 
   Stream<AppUser?> getUserStream(String uid) {
