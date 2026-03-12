@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../theme/app_theme.dart';
 import 'upload_files_screen.dart';
 import '../shared/chat_list_screen.dart';
@@ -44,20 +45,20 @@ class _StudentMainScreenState extends State<StudentMainScreen> {
     return Scaffold(
       body: _screens[_currentIndex],
       bottomNavigationBar: Container(
-        margin: const EdgeInsets.only(left: 16, right: 16, bottom: 20),
+        margin: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 16.h),
         decoration: BoxDecoration(
           color: AppTheme.surface,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(20.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(20.r),
           child: BottomNavigationBar(
             currentIndex: _currentIndex,
             onTap: (index) {
@@ -72,9 +73,9 @@ class _StudentMainScreenState extends State<StudentMainScreen> {
             unselectedItemColor: AppTheme.textLight,
             showSelectedLabels: true,
             showUnselectedLabels: false,
-            selectedLabelStyle: const TextStyle(
+            selectedLabelStyle: TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 12,
+              fontSize: 10.sp,
             ),
             items: const [
               BottomNavigationBarItem(
@@ -115,11 +116,15 @@ class StudentDashboardContent extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppTheme.background,
       appBar: AppBar(
-        title: const Text('Student Dashboard'),
+        title: Text(
+          'Student Dashboard',
+          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+        ),
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none_outlined, color: AppTheme.dark),
+            icon: Icon(Icons.notifications_none_outlined,
+                color: AppTheme.dark, size: 24.sp),
             onPressed: () {
               Navigator.push(
                 context,
@@ -142,21 +147,21 @@ class StudentDashboardContent extends StatelessWidget {
             return LayoutBuilder(
               builder: (context, constraints) {
                 return SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Welcome Section
                       Container(
-                        padding: const EdgeInsets.all(24),
+                        padding: EdgeInsets.all(20.r),
                         decoration: BoxDecoration(
                           color: AppTheme.primary,
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(20.r),
                           boxShadow: [
                             BoxShadow(
-                              color: AppTheme.primary.withOpacity(0.3),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
+                              color: AppTheme.primary.withOpacity(0.2),
+                              blurRadius: 15,
+                              offset: const Offset(0, 8),
                             ),
                           ],
                         ),
@@ -169,12 +174,12 @@ class StudentDashboardContent extends StatelessWidget {
                             return Row(
                               children: [
                                 CircleAvatar(
-                                  radius: 30,
+                                  radius: 26.r,
                                   backgroundColor: Colors.white.withOpacity(0.2),
-                                  child: const Icon(Icons.person,
-                                      color: Colors.white, size: 30),
+                                  child: Icon(Icons.person,
+                                      color: Colors.white, size: 26.sp),
                                 ),
-                                const SizedBox(width: 16),
+                                SizedBox(width: 12.w),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,14 +188,14 @@ class StudentDashboardContent extends StatelessWidget {
                                         'Welcome back,',
                                         style: TextStyle(
                                           color: Colors.white.withOpacity(0.8),
-                                          fontSize: 14,
+                                          fontSize: 13.sp,
                                         ),
                                       ),
                                       Text(
                                         userName,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           color: Colors.white,
-                                          fontSize: 22,
+                                          fontSize: 18.sp,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -203,17 +208,17 @@ class StudentDashboardContent extends StatelessWidget {
                         ),
                       ),
 
-                      const SizedBox(height: 32),
+                      SizedBox(height: 28.h),
 
-                      const Text(
+                      Text(
                         'Project Information',
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.bold,
                           color: AppTheme.dark,
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 12.h),
 
                       if (group != null) ...[
                         _buildFeatureCard(
@@ -230,7 +235,7 @@ class StudentDashboardContent extends StatelessWidget {
                             );
                           },
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 12.h),
                         _buildFeatureCard(
                           title: 'Group Chat',
                           subtitle: 'Connect with your team',
@@ -258,7 +263,7 @@ class StudentDashboardContent extends StatelessWidget {
                         ),
                       ],
 
-                      const SizedBox(height: 16),
+                      SizedBox(height: 12.h),
                       _buildFeatureCard(
                         title: 'Upload Work',
                         subtitle: 'Submit your progress',
@@ -287,51 +292,52 @@ class StudentDashboardContent extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16.r),
         border: Border.all(color: color.withOpacity(0.1)),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16.r),
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(16.r),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: EdgeInsets.all(10.r),
                   decoration: BoxDecoration(
                     color: color.withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(icon, color: color, size: 28),
+                  child: Icon(icon, color: color, size: 24.sp),
                 ),
-                const SizedBox(width: 20),
+                SizedBox(width: 16.w),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(
-                          fontSize: 18,
+                        style: TextStyle(
+                          fontSize: 15.sp,
                           fontWeight: FontWeight.bold,
                           color: AppTheme.dark,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: 2.h),
                       Text(
                         subtitle,
-                        style: const TextStyle(
-                          fontSize: 14,
+                        style: TextStyle(
+                          fontSize: 12.sp,
                           color: AppTheme.textLight,
                         ),
                       ),
                     ],
                   ),
                 ),
-                Icon(Icons.chevron_right_rounded, color: color.withOpacity(0.5)),
+                Icon(Icons.chevron_right_rounded,
+                    color: color.withOpacity(0.5), size: 20.sp),
               ],
             ),
           ),

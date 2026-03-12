@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../theme/app_theme.dart';
 
 class CustomButton extends StatelessWidget {
@@ -24,13 +25,13 @@ class CustomButton extends StatelessWidget {
         onPressed: isLoading ? null : onPressed,
         style: OutlinedButton.styleFrom(
           foregroundColor: AppTheme.primary,
-          side: const BorderSide(color: AppTheme.primary, width: 2),
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 32),
+          side: BorderSide(color: AppTheme.primary, width: 2.w),
+          padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 32.w),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12.r),
           ),
-          textStyle: const TextStyle(
-            fontSize: 18,
+          textStyle: TextStyle(
+            fontSize: 16.sp,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.5,
           ),
@@ -42,10 +43,10 @@ class CustomButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: isLoading ? null : onPressed,
       style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 32),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        textStyle: const TextStyle(
-          fontSize: 18,
+        padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 32.w),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+        textStyle: TextStyle(
+          fontSize: 16.sp,
           fontWeight: FontWeight.bold,
           letterSpacing: 0.5,
         ),
@@ -56,17 +57,21 @@ class CustomButton extends StatelessWidget {
 
   Widget _buildChild() {
     if (isLoading) {
-      return const SizedBox(
-        height: 24,
-        width: 24,
-        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
+      return SizedBox(
+        height: 20.h,
+        width: 20.w,
+        child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
       );
     }
 
     if (icon != null) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [Icon(icon, size: 20), const SizedBox(width: 8), Text(text)],
+        children: [
+          Icon(icon, size: 20.sp),
+          SizedBox(width: 8.w),
+          Text(text),
+        ],
       );
     }
 

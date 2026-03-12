@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_textfield.dart';
@@ -146,14 +147,14 @@ class _LoginScreenState extends State<LoginScreen> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final isWide = constraints.maxWidth > 600;
-            final horizontalPadding = isWide ? constraints.maxWidth * 0.2 : 24.0;
+            final horizontalPadding = isWide ? constraints.maxWidth * 0.2 : 24.w;
 
             return SingleChildScrollView(
               padding:
-                  EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 48),
+                  EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 40.h),
               child: Center(
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 500),
+                  constraints: BoxConstraints(maxWidth: 500.w),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -162,33 +163,33 @@ class _LoginScreenState extends State<LoginScreen> {
                           tag: 'logo',
                           child: Image.asset(
                             'assets/icon/logo.png',
-                            height: 100,
+                            height: 80.h,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 24),
-                      const Text(
+                      SizedBox(height: 24.h),
+                      Text(
                         'Welcome Back',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 28,
+                          fontSize: 24.sp,
                           fontWeight: FontWeight.bold,
                           color: AppTheme.dark,
                           letterSpacing: -1,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      const Text(
+                      SizedBox(height: 8.h),
+                      Text(
                         'Find Your Fit',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 14.sp,
                           fontWeight: FontWeight.w500,
                           color: AppTheme.primary,
                           letterSpacing: 1.2,
                         ),
                       ),
-                      const SizedBox(height: 48),
+                      SizedBox(height: 40.h),
                       Form(
                         key: _formKey,
                         child: Column(
@@ -209,7 +210,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 return null;
                               },
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 16.h),
                             CustomTextField(
                               label: 'Password',
                               hint: '••••••••',
@@ -226,33 +227,37 @@ class _LoginScreenState extends State<LoginScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 8.h),
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
                           onPressed: _handleForgot,
-                          child: const Text(
+                          child: Text(
                             'Forgot Password?',
                             style: TextStyle(
                               color: AppTheme.primary,
+                              fontSize: 13.sp,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      SizedBox(height: 24.h),
                       CustomButton(
                         text: 'Sign In',
                         isLoading: _isLoading,
                         onPressed: _handleLogin,
                       ),
-                      const SizedBox(height: 24),
+                      SizedBox(height: 24.h),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text(
+                          Text(
                             "Don't have an account? ",
-                            style: TextStyle(color: AppTheme.textLight),
+                            style: TextStyle(
+                              color: AppTheme.textLight,
+                              fontSize: 14.sp,
+                            ),
                           ),
                           GestureDetector(
                             onTap: () {
@@ -263,10 +268,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               );
                             },
-                            child: const Text(
+                            child: Text(
                               'Register',
                               style: TextStyle(
                                 color: AppTheme.primary,
+                                fontSize: 14.sp,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),

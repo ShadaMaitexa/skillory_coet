@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'firebase_options.dart';
 import 'theme/app_theme.dart';
@@ -25,33 +26,40 @@ class SkilloryApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          create: (_) => AdminProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => CoordinatorProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => GuideProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => StudentProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => SharedProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => ActivityProvider(),
-        ),
-      ],
-      child: MaterialApp(
-        title: 'Skillory',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
-        home: const OnboardingScreen(),
-      ),
+    return ScreenUtilInit(
+      designSize: const Size(375, 812),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, child) {
+        return MultiProvider(
+          providers: [
+            ChangeNotifierProvider(
+              create: (_) => AdminProvider(),
+            ),
+            ChangeNotifierProvider(
+              create: (_) => CoordinatorProvider(),
+            ),
+            ChangeNotifierProvider(
+              create: (_) => GuideProvider(),
+            ),
+            ChangeNotifierProvider(
+              create: (_) => StudentProvider(),
+            ),
+            ChangeNotifierProvider(
+              create: (_) => SharedProvider(),
+            ),
+            ChangeNotifierProvider(
+              create: (_) => ActivityProvider(),
+            ),
+          ],
+          child: MaterialApp(
+            title: 'Skillory',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            home: const OnboardingScreen(),
+          ),
+        );
+      },
     );
   }
 }

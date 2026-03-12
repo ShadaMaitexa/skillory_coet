@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../theme/app_theme.dart';
 
 class CustomTextField extends StatelessWidget {
@@ -30,31 +31,31 @@ class CustomTextField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 14,
+          style: TextStyle(
+            fontSize: 13.sp,
             fontWeight: FontWeight.w600,
             color: AppTheme.text,
             letterSpacing: -0.3,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 6.h),
         TextFormField(
           controller: controller,
           obscureText: isPassword,
           keyboardType: keyboardType,
           validator: validator,
           maxLines: maxLines,
-          style: const TextStyle(fontSize: 16, color: AppTheme.text),
+          style: TextStyle(fontSize: 14.sp, color: AppTheme.text),
           decoration: InputDecoration(
             hintText: hint,
             prefixIcon: prefixIcon != null
-                ? Icon(prefixIcon, color: AppTheme.textLight, size: 22)
+                ? Icon(prefixIcon, color: AppTheme.textLight, size: 20.sp)
                 : null,
             suffixIcon: isPassword
-                ? const Icon(
+                ? Icon(
                     Icons.visibility_off,
                     color: AppTheme.textLight,
-                    size: 22,
+                    size: 20.sp,
                   )
                 : null,
           ),

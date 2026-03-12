@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class AppTheme {
   // Brand Colors (Strictly matched to Logo)
@@ -22,14 +23,14 @@ class AppTheme {
         surface: surface,
         error: Color(0xFFB00020),
       ),
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        iconTheme: IconThemeData(color: dark),
+        iconTheme: const IconThemeData(color: dark),
         titleTextStyle: TextStyle(
           color: dark,
-          fontSize: 22,
+          fontSize: 20.sp,
           fontWeight: FontWeight.bold,
           letterSpacing: -0.5,
         ),
@@ -39,12 +40,12 @@ class AppTheme {
           backgroundColor: primary,
           foregroundColor: Colors.white,
           elevation: 0,
-          padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 32),
+          padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 32.w),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12.r),
           ),
-          textStyle: const TextStyle(
-            fontSize: 18,
+          textStyle: TextStyle(
+            fontSize: 16.sp,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.5,
           ),
@@ -54,12 +55,12 @@ class AppTheme {
         style: OutlinedButton.styleFrom(
           foregroundColor: primary,
           side: const BorderSide(color: primary, width: 2),
-          padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 32),
+          padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 32.w),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12.r),
           ),
-          textStyle: const TextStyle(
-            fontSize: 18,
+          textStyle: TextStyle(
+            fontSize: 16.sp,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.5,
           ),
@@ -68,33 +69,33 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: surface,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 24,
-          vertical: 20,
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: 20.w,
+          vertical: 16.h,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12.r),
           borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12.r),
           borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12.r),
           borderSide: const BorderSide(color: primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12.r),
           borderSide: const BorderSide(color: Color(0xFFB00020)),
         ),
-        hintStyle: const TextStyle(color: textLight, fontSize: 16),
+        hintStyle: TextStyle(color: textLight, fontSize: 14.sp),
       ),
       cardTheme: CardThemeData(
         color: surface,
         elevation: 4,
         shadowColor: Colors.black.withValues(alpha: 0.1),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
       ),
     );
   }
