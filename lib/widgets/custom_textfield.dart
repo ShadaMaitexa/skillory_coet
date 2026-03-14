@@ -12,6 +12,9 @@ class CustomTextField extends StatefulWidget {
   final String? Function(String?)? validator;
   final int maxLines;
 
+  final TextInputAction? textInputAction;
+  final Function(String)? onFieldSubmitted;
+
   const CustomTextField({
     super.key,
     required this.label,
@@ -22,6 +25,8 @@ class CustomTextField extends StatefulWidget {
     this.keyboardType = TextInputType.text,
     this.validator,
     this.maxLines = 1,
+    this.textInputAction,
+    this.onFieldSubmitted,
   });
 
   @override
@@ -57,7 +62,11 @@ class _CustomTextFieldState extends State<CustomTextField> {
           obscureText: _obscureText,
           keyboardType: widget.keyboardType,
           validator: widget.validator,
-          maxLines: widget.maxLines,
+          maxLines: widget.isPassword ? 1 : widget.maxLines,
+          textInputAction: widget.textInputAction,
+          onFieldSubmitted: widget.onFieldSubmitted,
+          autocorrect: !widget.isPassword,
+          enableSuggestions: !widget.isPassword,
           style: TextStyle(fontSize: 14.sp, color: AppTheme.text),
           decoration: InputDecoration(
             hintText: widget.hint,
@@ -66,6 +75,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
                 : null,
             suffixIcon: widget.isPassword
                 ? IconButton(
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    visualDensity: VisualDensity.compact,
                     icon: Icon(
                       _obscureText ? Icons.visibility_off : Icons.visibility,
                       color: AppTheme.textLight,

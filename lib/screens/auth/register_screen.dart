@@ -402,6 +402,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           hint: 'e.g. John Doe',
           controller: _nameController,
           prefixIcon: Icons.person,
+          textInputAction: TextInputAction.next,
           validator: (v) {
             if (v == null || v.isEmpty) return 'Name required';
             if (v.trim().length < 3) return 'Name is too short';
@@ -445,6 +446,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             hint: 'e.g. 21CS001',
             controller: _rollNumberController,
             prefixIcon: Icons.badge,
+            textInputAction: TextInputAction.next,
             validator: (v) {
               if (v == null || v.isEmpty) return 'Roll number required';
               if (v.length < 5) return 'Invalid roll number format';
@@ -491,6 +493,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           hint: 'e.g. john@example.com',
           controller: _emailController,
           prefixIcon: Icons.email,
+          textInputAction: TextInputAction.next,
           validator: (v) {
             if (v == null || v.isEmpty) return 'Email required';
             if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(v)) {
@@ -506,6 +509,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           controller: _passwordController,
           isPassword: true,
           prefixIcon: Icons.lock,
+          textInputAction: TextInputAction.next,
           validator: (v) {
             if (v == null || v.isEmpty) return 'Password required';
             if (v.length < 6) return 'Password must be at least 6 characters';
@@ -519,6 +523,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
           controller: _confirmPasswordController,
           isPassword: true,
           prefixIcon: Icons.lock_reset,
+          textInputAction: TextInputAction.done,
+          onFieldSubmitted: (_) => _handleRegister(),
           validator: (v) {
              if (v == null || v.isEmpty) return 'Please confirm your password';
              if (v != _passwordController.text) return 'Passwords do not match';

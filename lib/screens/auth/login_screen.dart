@@ -200,6 +200,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               prefixIcon: Icons.email_outlined,
                               keyboardType: TextInputType.emailAddress,
                               controller: _emailController,
+                              textInputAction: TextInputAction.next,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Please enter your email';
@@ -218,6 +219,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               prefixIcon: Icons.lock_outline,
                               isPassword: true,
                               controller: _passwordController,
+                              textInputAction: TextInputAction.done,
+                              onFieldSubmitted: (_) => _handleLogin(),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Please enter your password';
