@@ -588,7 +588,7 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                 children: [
                   TextFormField(
                     controller: nameCtrl,
-                    style: TextStyle(fontSize: 14.sp),
+                    style: TextStyle(fontSize: 14.sp, color: Colors.black87),
                     decoration: InputDecoration(
                       labelText: 'Department Name',
                       hintText: 'e.g. Computer Science',
@@ -648,6 +648,7 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                                 flex: 3,
                                 child: TextFormField(
                                   controller: e['semCtrl'] as TextEditingController,
+                                  style: TextStyle(fontSize: 14.sp, color: Colors.black87),
                                   decoration: InputDecoration(
                                     labelText: 'Semester ${i + 1}',
                                     hintText: 'e.g. 1st Sem',
@@ -664,6 +665,7 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                                 child: TextFormField(
                                   controller:
                                       e['limitCtrl'] as TextEditingController,
+                                  style: TextStyle(fontSize: 14.sp, color: Colors.black87),
                                   decoration: const InputDecoration(
                                     labelText: 'Students',
                                     hintText: '60',
@@ -689,6 +691,7 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                                 child: TextFormField(
                                   controller:
                                       e['groupLimitCtrl'] as TextEditingController,
+                                  style: TextStyle(fontSize: 14.sp, color: Colors.black87),
                                   decoration: const InputDecoration(
                                     labelText: 'Grp Size',
                                     hintText: '4',
@@ -837,6 +840,7 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                 children: [
                   TextFormField(
                     controller: nameCtrl,
+                    style: TextStyle(fontSize: 14.sp, color: Colors.black87),
                     decoration: const InputDecoration(
                       labelText: 'Department Name',
                       prefixIcon: Icon(Icons.school_outlined),
@@ -892,6 +896,7 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                                 flex: 3,
                                 child: TextFormField(
                                   controller: e['semCtrl'] as TextEditingController,
+                                  style: TextStyle(fontSize: 14.sp, color: Colors.black87),
                                   decoration: InputDecoration(
                                     labelText: 'Semester ${i + 1}',
                                     hintText: 'e.g. 1st Sem',
@@ -908,6 +913,7 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                                 child: TextFormField(
                                   controller:
                                       e['limitCtrl'] as TextEditingController,
+                                  style: TextStyle(fontSize: 14.sp, color: Colors.black87),
                                   decoration: const InputDecoration(
                                     labelText: 'Students',
                                     hintText: '60',
@@ -933,6 +939,7 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                                 child: TextFormField(
                                   controller:
                                       e['groupLimitCtrl'] as TextEditingController,
+                                  style: TextStyle(fontSize: 14.sp, color: Colors.black87),
                                   decoration: const InputDecoration(
                                     labelText: 'Grp Size',
                                     hintText: '4',
