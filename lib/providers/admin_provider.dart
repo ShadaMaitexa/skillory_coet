@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/email_service.dart';
 
 
@@ -11,6 +12,11 @@ class AdminProvider extends ChangeNotifier {
 
   AdminProvider({UserRepository? userRepository})
       : _userRepository = userRepository ?? UserRepository();
+
+  Stream<QuerySnapshot> get departmentsStream => _userRepository.getDepartmentsStream();
+
+  Stream<int> studentsCountStream(String dept, String sem) => 
+      _userRepository.getStudentsCountStream(dept, sem);
 
 
   Stream<int> get totalUsersCountStream =>

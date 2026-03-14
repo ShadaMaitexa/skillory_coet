@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../models/app_user.dart';
 import '../../providers/admin_provider.dart';
-import '../../theme/app_theme.dart';
-import '../../utils/departments_helper.dart';
+import '../../providers/shared_provider.dart';
 import '../auth/login_screen.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../theme/app_theme.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
@@ -58,10 +58,20 @@ class _AdminDashboardState extends State<AdminDashboard>
                         child: const Text('Cancel'),
                       ),
                       TextButton(
-                        onPressed: () => Navigator.of(ctx).pop(true),
+                        onPressed: () async {
+                          Navigator.of(ctx).pop(true);
+                          await context.read<SharedProvider>().signOut();
+                          if (mounted) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const LoginScreen()),
+                            );
+                          }
+                        },
                         child: const Text(
                           'Logout',
-                          style: TextStyle(color: AppTheme.primary),
+                          style: TextStyle(color: Colors.red),
                         ),
                       ),
                     ],
@@ -563,12 +573,11 @@ class _DepartmentsTab extends StatefulWidget {
 }
 
 class _DepartmentsTabState extends State<_DepartmentsTab> {
-  late final FirebaseFirestore _firestore;
+  FirebaseFirestore get _firestore => FirebaseFirestore.instance;
 
   @override
   void initState() {
     super.initState();
-    _firestore = FirebaseFirestore.instance;
   }
 
   // ── ADD DEPARTMENT ───────────────────────────────────────
@@ -1133,10 +1142,7 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
           const SizedBox(height: 16),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: _firestore
-                  .collection('departments')
-                  .orderBy('name')
-                  .snapshots(),
+              stream: context.watch<AdminProvider>().departmentsStream,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -1302,15 +1308,10 @@ class _SemesterCapacityRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .where('role', isEqualTo: 'Student')
-          .where('department', isEqualTo: department)
-          .where('semester', isEqualTo: semester)
-          .snapshots(),
+    return StreamBuilder<int>(
+      stream: context.watch<AdminProvider>().studentsCountStream(department, semester),
       builder: (context, snapshot) {
-        final count = snapshot.data?.docs.length ?? 0;
+        final count = snapshot.data ?? 0;
         final isFull = limit > 0 && count >= limit;
         final progress = limit > 0 ? (count / limit).clamp(0.0, 1.0) : 0.0;
 
@@ -1433,10 +1434,11 @@ class _AutoFormGroupsCardState extends State<_AutoFormGroupsCard> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: departmentsStream(),
+    return StreamBuilder<QuerySnapshot>(
+      stream: context.watch<AdminProvider>().departmentsStream,
       builder: (context, snapshot) {
-        final allDepts = snapshot.data ?? [];
+        final allDocs = snapshot.data?.docs ?? [];
+        final allDepts = allDocs.map((d) => d.data() as Map<String, dynamic>).toList();
         final depts = allDepts
             .map((d) => (d['name'] ?? '').toString())
             .where((n) => n.isNotEmpty)
@@ -1606,15 +1608,10 @@ class _GenerateGroupsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .where('role', isEqualTo: 'Student')
-          .where('department', isEqualTo: department)
-          .where('semester', isEqualTo: semester)
-          .snapshots(),
+    return StreamBuilder<int>(
+      stream: context.watch<AdminProvider>().studentsCountStream(department, semester),
       builder: (context, snapshot) {
-        final count = snapshot.data?.docs.length ?? 0;
+        final count = snapshot.data ?? 0;
         final isFull = limit > 0 && count >= limit;
         final progress = limit > 0 ? (count / limit).clamp(0.0, 1.0) : 0.0;
 
@@ -1635,7 +1632,7 @@ class _GenerateGroupsSection extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
+                   Row(
                     children: [
                       Icon(
                         isFull ? Icons.check_circle : Icons.hourglass_top,

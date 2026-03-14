@@ -85,4 +85,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'skillory-3407f.firebasestorage.app',
     measurementId: 'G-WC7EQ8ZVRM',
   );
+
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:async';
 import 'dart:io';
@@ -12,6 +11,8 @@ import '../../widgets/custom_textfield.dart';
 import '../../utils/cloudinary_helper.dart';
 import '../../utils/departments_helper.dart';
 import '../../models/app_user.dart';
+import '../../providers/shared_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -168,22 +169,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       // ── Check semester capacity ──────────────────────────
       try {
-        final deptDoc = await FirebaseFirestore.instance
-            .collection('departments')
-            .doc(_selectedDept)
-            .get();
+        final sharedProvider = context.read<SharedProvider>();
+        final deptDoc = await sharedProvider.getDepartmentDoc(_selectedDept!);
         if (deptDoc.exists) {
           final rawLimits =
               deptDoc.data()?['semesterLimits'] as Map<String, dynamic>?;
           if (rawLimits != null && rawLimits.containsKey(_selectedSem)) {
             final limit = (rawLimits[_selectedSem] as num).toInt();
-            final countSnap = await FirebaseFirestore.instance
-                .collection('users')
-                .where('role', isEqualTo: 'Student')
-                .where('department', isEqualTo: _selectedDept)
-                .where('semester', isEqualTo: _selectedSem)
-                .get();
-            if (countSnap.docs.length >= limit) {
+            final count = await sharedProvider.getStudentCount(_selectedDept!, _selectedSem!);
+            if (count >= limit) {
               _showError(
                 'Registration closed: $_selectedSem in $_selectedDept has reached '
                 'its maximum capacity of $limit students.',
@@ -211,7 +205,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         if (proofUrl == null) throw 'Cloudinary upload failed.';
       }
 
-      final cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      final sharedProvider = context.read<SharedProvider>();
+      final cred = await sharedProvider.signUp(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
@@ -244,10 +239,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         createdAt: Timestamp.now(),
       );
 
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(cred.user!.uid)
-          .set(appUser.toMap());
+      await sharedProvider.saveUser(appUser);
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

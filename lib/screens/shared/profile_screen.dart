@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart' show User;
 
 import '../../theme/app_theme.dart';
 import '../auth/login_screen.dart';
@@ -17,11 +17,13 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return const Center(child: Text('Not logged in'));
-
+    final sharedProvider = context.watch<SharedProvider>();
+    // Note: We still need to know which UID to fetch.
+    // We can get it from the sharedProvider if we add a getter for currently logged in UID.
+    // For now, let's keep it simple but safe via Firebase.apps check.
+    
     return StreamBuilder<AppUser?>(
-      stream: context.read<SharedProvider>().getUserStream(user.uid),
+      stream: sharedProvider.getUserStream(null), // Path to get current user uid inside repository
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -249,7 +251,7 @@ class ProfileScreen extends StatelessWidget {
           );
 
           if (confirm == true) {
-            await FirebaseAuth.instance.signOut();
+            await context.read<SharedProvider>().signOut();
             if (context.mounted) {
               Navigator.pushAndRemoveUntil(
                 context,

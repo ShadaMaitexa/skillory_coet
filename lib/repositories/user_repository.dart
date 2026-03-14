@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/app_user.dart';
 
 class UserRepository {
   FirebaseFirestore get _firestore => FirebaseFirestore.instance;
+  FirebaseAuth get _auth => FirebaseAuth.instance;
 
   UserRepository();
 
@@ -64,6 +66,20 @@ class UserRepository {
         .map(
           (snapshot) => snapshot.docs.length,
         );
+  }
+
+  Stream<QuerySnapshot> getDepartmentsStream() {
+    return _firestore.collection('departments').orderBy('name').snapshots();
+  }
+
+  Stream<int> getStudentsCountStream(String department, String semester) {
+    return _firestore
+        .collection('users')
+        .where('role', isEqualTo: 'Student')
+        .where('department', isEqualTo: department)
+        .where('semester', isEqualTo: semester)
+        .snapshots()
+        .map((snap) => snap.docs.length);
   }
 
   Future<void> approveFaculty({
@@ -221,8 +237,10 @@ class UserRepository {
     }
   }
 
-  Stream<AppUser?> getUserStream(String uid) {
-    return _firestore.collection('users').doc(uid).snapshots().map(
+  Stream<AppUser?> getUserStream(String? uid) {
+    final targetUid = uid ?? _auth.currentUser?.uid;
+    if (targetUid == null) return Stream.value(null);
+    return _firestore.collection('users').doc(targetUid).snapshots().map(
           (snapshot) => snapshot.exists
               ? AppUser.fromDocument(snapshot)
               : null,

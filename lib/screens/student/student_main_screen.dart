@@ -12,7 +12,6 @@ import '../shared/project_details_screen.dart';
 import '../shared/chat_room_screen.dart';
 import '../shared/activity_screen.dart';
 import 'questionnaires_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../../providers/shared_provider.dart';
 
 class StudentMainScreen extends StatefulWidget {
@@ -167,9 +166,7 @@ class StudentDashboardContent extends StatelessWidget {
                           ],
                         ),
                         child: StreamBuilder<AppUser?>(
-                          stream: context.watch<SharedProvider>().getUserStream(
-                                FirebaseAuth.instance.currentUser?.uid ?? '',
-                              ),
+                          stream: context.watch<SharedProvider>().getUserStream(null),
                           builder: (context, userSnap) {
                             final userName = userSnap.data?.name ?? 'Student';
                             return Row(

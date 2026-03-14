@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_textfield.dart';
@@ -7,8 +8,8 @@ import '../student/student_main_screen.dart';
 import '../admin/admin_dashboard.dart';
 import '../faculty/coordinator_main_screen.dart';
 import '../faculty/guide_main_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../providers/shared_provider.dart';
+import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuthException;
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -42,8 +43,8 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(
-        email: _emailController.text.trim(),
+      await context.read<SharedProvider>().sendPasswordResetEmail(
+        _emailController.text.trim(),
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -76,13 +77,10 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final userCredential = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: email, password: password);
+      final sharedProvider = context.read<SharedProvider>();
+      final userCredential = await sharedProvider.signIn(email: email, password: password);
 
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userCredential.user!.uid)
-          .get();
+      final doc = await sharedProvider.getUserDoc(userCredential.user!.uid);
 
       if (!mounted) return;
 
@@ -100,7 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
           data['specificRole']; // guide or coordinator if set by admin
 
       if (status != 'approved') {
-        await FirebaseAuth.instance.signOut();
+        await sharedProvider.signOut();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Account waiting for admin approval.')),
         );
