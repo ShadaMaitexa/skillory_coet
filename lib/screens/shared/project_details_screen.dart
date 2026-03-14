@@ -212,7 +212,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
 
   Widget _buildFeedbackList() {
     return StreamBuilder<List<FeedbackModel>>(
-      stream: context.read<SharedProvider>().feedbackForGroup(widget.group.id),
+      stream: context.watch<SharedProvider>().feedbackForGroup(widget.group.id),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());

@@ -48,10 +48,12 @@ class AdminProvider extends ChangeNotifier {
   Future<void> autoFormGroups({
     required String department,
     required String semester,
+    required int groupLimit,
   }) {
     return _userRepository.autoFormGroupsForDepartmentSemester(
       department: department,
       semester: semester,
+      groupLimit: groupLimit,
     );
   }
 }

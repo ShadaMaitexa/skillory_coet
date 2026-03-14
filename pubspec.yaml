@@ -44,6 +44,8 @@ dependencies:
   path: ^1.9.0
   url_launcher: ^6.3.1
   flutter_screenutil: ^5.9.3
+  file_picker: ^10.3.10
+  open_file: ^3.5.11
 
 dev_dependencies:
   flutter_test:

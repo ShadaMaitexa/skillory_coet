@@ -19,11 +19,13 @@ class StudentProvider extends ChangeNotifier {
     required String fileName,
     required String groupId,
     required String type,
+    String? url,
   }) async {
     await _fileRepository.addFileRecord(
       fileName: fileName,
       groupId: groupId,
       type: type,
+      url: url,
     );
   }
 

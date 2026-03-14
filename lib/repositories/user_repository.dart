@@ -80,6 +80,7 @@ class UserRepository {
   Future<void> autoFormGroupsForDepartmentSemester({
     required String department,
     required String semester,
+    required int groupLimit,
   }) async {
     final querySnapshot = await _firestore
         .collection('users')
@@ -98,7 +99,7 @@ class UserRepository {
       }
     }
 
-    if (candidates.length < 5) {
+    if (candidates.length < groupLimit) {
       return;
     }
 
@@ -134,13 +135,13 @@ class UserRepository {
         .sort((a, b) => skillScore(b.data()).compareTo(skillScore(a.data())));
 
     // Distribute using snake/round-robin pattern for skill diversity:
-    // Group them into groups of 5 by round-robin so each group gets
+    // Group them into groups of $groupLimit by round-robin so each group gets
     // a mix of high, medium, and low scorers.
-    final groupCount = candidates.length ~/ 5;
+    final groupCount = candidates.length ~/ groupLimit;
     final List<List<QueryDocumentSnapshot<Map<String, dynamic>>>> groups =
         List.generate(groupCount, (_) => []);
 
-    for (int i = 0; i < candidates.length && i < groupCount * 5; i++) {
+    for (int i = 0; i < candidates.length && i < groupCount * groupLimit; i++) {
       // Snake: 0,1,2,...,groupCount-1,groupCount-1,...,1,0,0,1,...
       final roundIndex = i ~/ groupCount;
       final posInRound = i % groupCount;
@@ -167,7 +168,7 @@ class UserRepository {
 
     for (int g = 0; g < groups.length; g++) {
       final slice = groups[g];
-      if (slice.length < 5) continue; // skip incomplete groups
+      if (slice.length < groupLimit) continue; // skip incomplete groups
 
       final memberIds = slice.map((d) => d.id).toList();
       final groupDoc = _firestore.collection('groups').doc();
@@ -194,7 +195,7 @@ class UserRepository {
     // ── Send Notifications ──
     for (int g = 0; g < groups.length; g++) {
       final slice = groups[g];
-      if (slice.length < 5) continue;
+      if (slice.length < groupLimit) continue;
       final groupName = '$department-$semester-Group-${g + 1}';
 
       for (final student in slice) {

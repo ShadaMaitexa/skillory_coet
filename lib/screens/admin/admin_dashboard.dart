@@ -614,6 +614,7 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                             semEntries.add({
                               'semCtrl': TextEditingController(),
                               'limitCtrl': TextEditingController(),
+                              'groupLimitCtrl': TextEditingController(),
                             });
                           });
                         },
@@ -717,18 +718,23 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                         (e['semCtrl'] as TextEditingController).text.trim())
                     .toList();
                 final semesterLimits = <String, int>{};
+                final semesterGroupLimits = <String, int>{};
                 for (final e in semEntries) {
                   final sem =
                       (e['semCtrl'] as TextEditingController).text.trim();
                   final limit = int.parse(
                       (e['limitCtrl'] as TextEditingController).text.trim());
+                  final groupLimit = int.parse(
+                      (e['groupLimitCtrl'] as TextEditingController).text.trim());
                   semesterLimits[sem] = limit;
+                  semesterGroupLimits[sem] = groupLimit;
                 }
 
                 await _firestore.collection('departments').doc(name).set({
                   'name': name,
                   'semesters': semesters,
                   'semesterLimits': semesterLimits,
+                  'semesterGroupLimits': semesterGroupLimits,
                   'createdAt': FieldValue.serverTimestamp(),
                 });
 
@@ -736,6 +742,7 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                 for (final e in semEntries) {
                   (e['semCtrl'] as TextEditingController).dispose();
                   (e['limitCtrl'] as TextEditingController).dispose();
+                  (e['groupLimitCtrl'] as TextEditingController).dispose();
                 }
 
                 if (ctx.mounted) Navigator.of(ctx).pop();
@@ -754,6 +761,7 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
     String currentName,
     List<String> currentSemesters,
     Map<String, int> currentLimits,
+    Map<String, int> currentGroupLimits,
   ) async {
     final nameCtrl = TextEditingController(text: currentName);
     final formKey = GlobalKey<FormState>();
@@ -764,6 +772,7 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
         'semCtrl': TextEditingController(text: sem),
         'limitCtrl':
             TextEditingController(text: (currentLimits[sem] ?? 60).toString()),
+        'groupLimitCtrl': TextEditingController(text: (currentGroupLimits[sem] ?? 4).toString()),
       };
     }).toList();
 
@@ -809,6 +818,7 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                             semEntries.add({
                               'semCtrl': TextEditingController(),
                               'limitCtrl': TextEditingController(),
+                              'groupLimitCtrl': TextEditingController(),
                             });
                           });
                         },
@@ -912,12 +922,16 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                         (e['semCtrl'] as TextEditingController).text.trim())
                     .toList();
                 final semesterLimits = <String, int>{};
+                final semesterGroupLimits = <String, int>{};
                 for (final e in semEntries) {
                   final sem =
                       (e['semCtrl'] as TextEditingController).text.trim();
                   final limit = int.parse(
                       (e['limitCtrl'] as TextEditingController).text.trim());
+                  final groupLimit = int.parse(
+                      (e['groupLimitCtrl'] as TextEditingController).text.trim());
                   semesterLimits[sem] = limit;
+                  semesterGroupLimits[sem] = groupLimit;
                 }
 
                 if (newName != docId) {
@@ -930,12 +944,14 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                   'name': newName,
                   'semesters': semesters,
                   'semesterLimits': semesterLimits,
+                  'semesterGroupLimits': semesterGroupLimits,
                   'updatedAt': FieldValue.serverTimestamp(),
                 });
 
                 for (final e in semEntries) {
                   (e['semCtrl'] as TextEditingController).dispose();
                   (e['limitCtrl'] as TextEditingController).dispose();
+                  (e['groupLimitCtrl'] as TextEditingController).dispose();
                 }
 
                 if (ctx.mounted) Navigator.of(ctx).pop();
@@ -1072,6 +1088,10 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                         ? rawLimits
                             .map((k, v) => MapEntry(k, (v as num).toInt()))
                         : <String, int>{};
+                    final rawGroupLimits = data['semesterGroupLimits'] as Map<String, dynamic>?;
+                    final semesterGroupLimits = rawGroupLimits != null
+                        ? rawGroupLimits.map((k, v) => MapEntry(k, (v as num).toInt()))
+                        : <String, int>{};
 
                     return Container(
                       margin: const EdgeInsets.only(bottom: 12),
@@ -1122,7 +1142,7 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                                   icon: const Icon(Icons.edit_outlined,
                                       color: AppTheme.primary, size: 20),
                                   onPressed: () => _showEditDepartmentDialog(
-                                      doc.id, name, semesters, semesterLimits),
+                                      doc.id, name, semesters, semesterLimits, semesterGroupLimits),
                                   tooltip: 'Edit',
                                 ),
                                 IconButton(
@@ -1291,7 +1311,7 @@ class _GroupsTab extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             const Text(
-              'Groups of 5 are formed automatically based on student skills when a semester is full.',
+              'Groups are formed automatically based on student skills and limits when a semester is full.',
               style: TextStyle(color: AppTheme.textLight, fontSize: 13),
             ),
             const SizedBox(height: 32),
@@ -1323,6 +1343,7 @@ class _AutoFormGroupsCardState extends State<_AutoFormGroupsCard> {
 
         List<String> semesters = [];
         Map<String, int> semesterLimits = {};
+        Map<String, int> semesterGroupLimits = {};
         if (_selectedDept != null) {
           final deptData = allDepts.firstWhere(
             (d) => d['name'] == _selectedDept,
@@ -1335,6 +1356,10 @@ class _AutoFormGroupsCardState extends State<_AutoFormGroupsCard> {
           if (rawLimits != null) {
             semesterLimits =
                 rawLimits.map((k, v) => MapEntry(k, (v as num).toInt()));
+          }
+          final rawGroupLimits = deptData['semesterGroupLimits'] as Map<String, dynamic>?;
+          if (rawGroupLimits != null) {
+            semesterGroupLimits = rawGroupLimits.map((k,v) => MapEntry(k, (v as num).toInt()));
           }
         }
 
@@ -1411,8 +1436,9 @@ class _AutoFormGroupsCardState extends State<_AutoFormGroupsCard> {
                   department: _selectedDept!,
                   semester: _selectedSem!,
                   limit: semesterLimits[_selectedSem] ?? 0,
+                  groupLimit: semesterGroupLimits[_selectedSem] ?? 4,
                   isLoading: _isLoading,
-                  onGenerate: () => _autoForm(),
+                  onGenerate: () => _autoForm(semesterGroupLimits[_selectedSem] ?? 4),
                 )
               else
                 SizedBox(
@@ -1430,18 +1456,19 @@ class _AutoFormGroupsCardState extends State<_AutoFormGroupsCard> {
     );
   }
 
-  Future<void> _autoForm() async {
+  Future<void> _autoForm(int groupLimit) async {
     setState(() => _isLoading = true);
     try {
       await context.read<AdminProvider>().autoFormGroups(
             department: _selectedDept!,
             semester: _selectedSem!,
+            groupLimit: groupLimit,
           );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
               content:
-                  Text('Groups of 5 formed successfully based on skills!')),
+                  Text('Groups formed successfully based on skills!')),
         );
       }
     } catch (e) {
@@ -1461,6 +1488,7 @@ class _GenerateGroupsSection extends StatelessWidget {
   final String department;
   final String semester;
   final int limit;
+  final int groupLimit;
   final bool isLoading;
   final VoidCallback onGenerate;
 
@@ -1468,6 +1496,7 @@ class _GenerateGroupsSection extends StatelessWidget {
     required this.department,
     required this.semester,
     required this.limit,
+    required this.groupLimit,
     required this.isLoading,
     required this.onGenerate,
   });
@@ -1574,7 +1603,7 @@ class _GenerateGroupsSection extends StatelessWidget {
                 label: Text(isLoading
                     ? 'Forming...'
                     : isFull
-                        ? 'Generate Groups (5 per group)'
+                        ? 'Generate Groups ( per group)'
                         : 'Generate Groups (Semester not full yet)'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: isFull ? AppTheme.primary : Colors.grey,

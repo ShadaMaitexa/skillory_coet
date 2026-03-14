@@ -50,7 +50,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         children: [
           Expanded(
             child: StreamBuilder<List<ChatMessage>>(
-              stream: context.read<SharedProvider>().messagesForGroup(widget.groupId),
+              stream: context.watch<SharedProvider>().messagesForGroup(widget.groupId),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());

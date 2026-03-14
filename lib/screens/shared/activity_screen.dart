@@ -15,7 +15,7 @@ class ActivityScreen extends StatelessWidget {
         title: const Text('Activity Feed'),
       ),
       body: StreamBuilder<List<ActivityModel>>(
-        stream: context.read<ActivityProvider>().myActivitiesStream,
+        stream: context.watch<ActivityProvider>().myActivitiesStream,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());

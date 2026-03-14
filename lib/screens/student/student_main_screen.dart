@@ -166,7 +166,7 @@ class StudentDashboardContent extends StatelessWidget {
                           ],
                         ),
                         child: StreamBuilder<AppUser?>(
-                          stream: context.read<SharedProvider>().getUserStream(
+                          stream: context.watch<SharedProvider>().getUserStream(
                                 FirebaseAuth.instance.currentUser?.uid ?? '',
                               ),
                           builder: (context, userSnap) {

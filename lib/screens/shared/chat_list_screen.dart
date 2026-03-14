@@ -29,7 +29,7 @@ class ChatListScreen extends StatelessWidget {
 
         if (role == 'Student') {
           return StreamBuilder<GroupModel?>(
-            stream: context.read<StudentProvider>().myGroupStream,
+            stream: context.watch<StudentProvider>().myGroupStream,
             builder: (context, snap) {
               if (snap.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
