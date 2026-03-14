@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../providers/activity_provider.dart';
 import '../../repositories/activity_repository.dart';
 import '../../theme/app_theme.dart';
@@ -27,20 +28,20 @@ class ActivityScreen extends StatelessWidget {
 
           return ListView.builder(
             itemCount: activities.length,
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16.r),
             itemBuilder: (context, index) {
               final activity = activities[index];
               return Card(
                 elevation: activity.isRead ? 0 : 2,
                 color: activity.isRead ? AppTheme.surface : Colors.white,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(16.r),
                   side: BorderSide(
                     color: activity.isRead ? Colors.transparent : AppTheme.primary.withOpacity(0.3),
-                    width: 1,
+                    width: 1.w,
                   ),
                 ),
-                margin: const EdgeInsets.only(bottom: 12),
+                margin: EdgeInsets.only(bottom: 12.h),
                 child: ListTile(
                   contentPadding: const EdgeInsets.all(16),
                   leading: CircleAvatar(
@@ -57,11 +58,11 @@ class ActivityScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 4),
-                      Text(activity.message),
-                      const SizedBox(height: 8),
+                      Text(activity.message, style: TextStyle(fontSize: 13.sp)),
+                      SizedBox(height: 8.h),
                       Text(
                         _formatDate(activity.timestamp),
-                        style: const TextStyle(fontSize: 10, color: AppTheme.textLight),
+                        style: TextStyle(fontSize: 10.sp, color: AppTheme.textLight),
                       ),
                     ],
                   ),

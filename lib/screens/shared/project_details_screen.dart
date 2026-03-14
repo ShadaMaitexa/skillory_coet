@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../theme/app_theme.dart';
 import '../../models/group.dart';
 import '../../models/feedback.dart';
@@ -41,9 +42,20 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
   }
 
   Future<void> _handleSave() async {
+    final title = _titleController.text.trim();
+    final desc = _descController.text.trim();
+    final tech = _techController.text.trim();
+
+    if (title.isEmpty || desc.isEmpty || tech.isEmpty) {
+       ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill all project fields before saving.')),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
     try {
-      final techStack = _techController.text
+      final techStack = tech
           .split(',')
           .map((e) => e.trim())
           .where((e) => e.isNotEmpty)
@@ -51,8 +63,8 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
 
       await context.read<StudentProvider>().updateProjectDetails(
             groupId: widget.group.id,
-            title: _titleController.text.trim(),
-            description: _descController.text.trim(),
+            title: title,
+            description: desc,
             techStack: techStack,
           );
 
@@ -62,9 +74,11 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
       );
       setState(() => _isEditing = false);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save: $e')),
+        );
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -85,21 +99,21 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+        padding: EdgeInsets.all(24.r),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _buildProjectInfoCard(),
-            const SizedBox(height: 32),
-            const Text(
+            SizedBox(height: 32.h),
+            Text(
               'Feedback History',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 20.sp,
                 fontWeight: FontWeight.bold,
                 color: AppTheme.dark,
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             _buildFeedbackList(),
           ],
         ),
@@ -109,10 +123,10 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
 
   Widget _buildProjectInfoCard() {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(24.r),
       decoration: BoxDecoration(
         color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
@@ -129,18 +143,18 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
               widget.group.projectTitle.isEmpty
                   ? 'No Project Title Set'
                   : widget.group.projectTitle,
-              style: const TextStyle(
-                fontSize: 22,
+              style: TextStyle(
+                fontSize: 22.sp,
                 fontWeight: FontWeight.bold,
                 color: AppTheme.dark,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             Text(
               widget.group.projectDescription.isEmpty
                   ? 'No description provided yet. Click edit to add details.'
                   : widget.group.projectDescription,
-              style: const TextStyle(fontSize: 15, color: AppTheme.text),
+              style: TextStyle(fontSize: 15.sp, color: AppTheme.text),
             ),
             if (widget.group.projectTechStack.isNotEmpty) ...[
               const SizedBox(height: 16),

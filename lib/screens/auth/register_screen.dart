@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../theme/app_theme.dart';
 import '../../widgets/custom_button.dart';
@@ -279,18 +280,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildHeader(),
-                const SizedBox(height: 32),
+                SizedBox(height: 32.h),
                 _buildRoleSelector(),
-                const SizedBox(height: 24),
+                SizedBox(height: 24.h),
                 _buildSectionHeader('Section 1: Basic Information'),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 _buildBasics(),
                 if (_selectedRole == 'Faculty') ...[
                   const SizedBox(height: 24),
@@ -331,13 +332,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       children: [
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 18,
+          style: TextStyle(
+            fontSize: 18.sp,
             fontWeight: FontWeight.bold,
             color: AppTheme.primary,
           ),
         ),
-        const Divider(color: AppTheme.primary, thickness: 1),
+        Divider(color: AppTheme.primary, thickness: 1.h),
       ],
     );
   }
@@ -345,14 +346,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget _buildHeader() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: const [
+      children: [
         Text(
           'Join Skillory',
-          style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 28.sp,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.dark,
+            letterSpacing: -1,
+          ),
         ),
+        SizedBox(height: 4.h),
         Text(
           'Complete details for smart grouping',
-          style: TextStyle(color: AppTheme.textLight),
+          style: TextStyle(
+            color: AppTheme.textLight,
+            fontSize: 14.sp,
+          ),
         ),
       ],
     );
@@ -362,15 +372,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Registering as:',
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 8),
+        Text(
+          'Registering as:',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp),
+        ),
+        SizedBox(height: 8.h),
         DropdownButtonFormField<String>(
           value: _selectedRole,
+          style: TextStyle(fontSize: 14.sp, color: AppTheme.text),
           decoration: InputDecoration(
             fillColor: AppTheme.surface,
             filled: true,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
           ),
           items: _roles
               .map((r) => DropdownMenuItem(value: r, child: Text(r)))
@@ -389,20 +402,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
           hint: 'e.g. John Doe',
           controller: _nameController,
           prefixIcon: Icons.person,
-          validator: (v) => v!.isEmpty ? 'Name required' : null,
+          validator: (v) {
+            if (v == null || v.isEmpty) return 'Name required';
+            if (v.trim().length < 3) return 'Name is too short';
+            return null;
+          },
         ),
         if (_selectedRole == 'Student' || _selectedRole == 'Faculty') ...[
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           // Department Dropdown
           DropdownButtonFormField<String>(
             value: _selectedDept,
+            style: TextStyle(fontSize: 14.sp, color: AppTheme.text),
             decoration: InputDecoration(
               labelText: 'Department / Branch',
-              prefixIcon: const Icon(Icons.business),
+              prefixIcon: Icon(Icons.business, size: 20.sp),
               fillColor: AppTheme.surface,
               filled: true,
               border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
             ),
             hint: _allDepartments.isEmpty
                 ? const Text('Loading departments...')
@@ -421,15 +439,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
         ],
         if (_selectedRole == 'Student') ...[
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           CustomTextField(
             label: 'Roll Number / ID',
             hint: 'e.g. 21CS001',
             controller: _rollNumberController,
             prefixIcon: Icons.badge,
-            validator: (v) => v!.isEmpty ? 'Roll number required' : null,
+            validator: (v) {
+              if (v == null || v.isEmpty) return 'Roll number required';
+              if (v.length < 5) return 'Invalid roll number format';
+              return null;
+            },
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           // Semester Dropdown (depends on dept)
           Builder(builder: (context) {
             final deptData = _allDepartments.firstWhere(
@@ -441,13 +463,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 .toList();
             return DropdownButtonFormField<String>(
               value: _selectedSem,
+              style: TextStyle(fontSize: 14.sp, color: AppTheme.text),
               decoration: InputDecoration(
                 labelText: 'Year / Semester',
-                prefixIcon: const Icon(Icons.calendar_today),
+                prefixIcon: Icon(Icons.calendar_today, size: 20.sp),
                 fillColor: AppTheme.surface,
                 filled: true,
                 border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
               ),
               hint: _selectedDept == null
                   ? const Text('Select department first')
@@ -468,26 +491,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
           hint: 'e.g. john@example.com',
           controller: _emailController,
           prefixIcon: Icons.email,
-          validator: (v) => v!.isEmpty ? 'Email required' : null,
+          validator: (v) {
+            if (v == null || v.isEmpty) return 'Email required';
+            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(v)) {
+              return 'Enter a valid email address';
+            }
+            return null;
+          },
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
         CustomTextField(
           label: 'Password',
           hint: 'Min 6 characters',
           controller: _passwordController,
           isPassword: true,
           prefixIcon: Icons.lock,
-          validator: (v) => v!.length < 6 ? 'Min 6 chars' : null,
+          validator: (v) {
+            if (v == null || v.isEmpty) return 'Password required';
+            if (v.length < 6) return 'Password must be at least 6 characters';
+            return null;
+          },
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
         CustomTextField(
           label: 'Confirm Password',
           hint: 'Re-enter password',
           controller: _confirmPasswordController,
           isPassword: true,
           prefixIcon: Icons.lock_reset,
-          validator: (v) =>
-              v != _passwordController.text ? 'Not matching' : null,
+          validator: (v) {
+             if (v == null || v.isEmpty) return 'Please confirm your password';
+             if (v != _passwordController.text) return 'Passwords do not match';
+             return null;
+          },
         ),
       ],
     );
@@ -497,14 +533,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Verification Proof',
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 8),
-        if (_proofFile != null) Image.file(_proofFile!, height: 100),
+        Text('Verification Proof',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.sp)),
+        SizedBox(height: 8.h),
+        if (_proofFile != null) Image.file(_proofFile!, height: 100.h),
         ElevatedButton.icon(
           onPressed: _pickProof,
-          icon: const Icon(Icons.upload_file),
-          label: Text(_proofFile == null ? 'Upload ID/Docs' : 'Change Docs'),
+          icon: Icon(Icons.upload_file, size: 20.sp),
+          label: Text(_proofFile == null ? 'Upload ID/Docs' : 'Change Docs', style: TextStyle(fontSize: 14.sp)),
         ),
       ],
     );
@@ -514,11 +550,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 16),
-        const Text('Programming Languages Familiar With:',
-            style: TextStyle(fontWeight: FontWeight.w600)),
+        SizedBox(height: 16.h),
+        Text('Programming Languages Familiar With:',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp)),
         ..._programmingLanguages.map((lang) => CheckboxListTile(
-              title: Text(lang),
+              title: Text(lang, style: TextStyle(fontSize: 14.sp)),
               value: _selectedLanguages.contains(lang),
               onChanged: (v) {
                 setState(() {
@@ -533,12 +569,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
           hint: 'e.g. Swift, Go, Kotlin',
           controller: _othersLanguageController,
         ),
-        const SizedBox(height: 24),
-        const Text('Rate your proficiency in programming:',
-            style: TextStyle(fontWeight: FontWeight.w600)),
+        SizedBox(height: 24.h),
+        Text('Rate your proficiency in programming:',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp)),
         ...['Beginner', 'Intermediate', 'Advanced']
             .map((level) => RadioListTile<String>(
-                  title: Text(level),
+                  title: Text(level, style: TextStyle(fontSize: 14.sp)),
                   value: level,
                   groupValue: _codingProficiency,
                   onChanged: (v) => setState(() => _codingProficiency = v),
@@ -551,11 +587,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 16),
-        const Text('Domains Interested In (Select up to 2):',
-            style: TextStyle(fontWeight: FontWeight.w600)),
+        SizedBox(height: 16.h),
+        Text('Domains Interested In (Select up to 2):',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp)),
         ..._domains.map((domain) => CheckboxListTile(
-              title: Text(domain),
+              title: Text(domain, style: TextStyle(fontSize: 14.sp)),
               value: _selectedDomains.contains(domain),
               onChanged: (v) {
                 if (v! && _selectedDomains.length >= 2) return;
@@ -566,14 +602,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 });
               },
             )),
-        const SizedBox(height: 24),
-        const Text('Have you worked on any project before?',
-            style: TextStyle(fontWeight: FontWeight.w600)),
+        SizedBox(height: 24.h),
+        Text('Have you worked on any project before?',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp)),
         Row(
           children: [
             Expanded(
               child: RadioListTile<bool>(
-                title: const Text('Yes'),
+                title: Text('Yes', style: TextStyle(fontSize: 14.sp)),
                 value: true,
                 groupValue: _hasWorkedOnProject,
                 onChanged: (v) => setState(() => _hasWorkedOnProject = v),
@@ -581,7 +617,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             Expanded(
               child: RadioListTile<bool>(
-                title: const Text('No'),
+                title: Text('No', style: TextStyle(fontSize: 14.sp)),
                 value: false,
                 groupValue: _hasWorkedOnProject,
                 onChanged: (v) => setState(() => _hasWorkedOnProject = v),
@@ -590,11 +626,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ],
         ),
         if (_hasWorkedOnProject == true) ...[
-          const SizedBox(height: 16),
-          const Text('Your role in the project(s):',
-              style: TextStyle(fontWeight: FontWeight.w600)),
+          SizedBox(height: 16.h),
+          Text('Your role in the project(s):',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp)),
           ..._prevProjectRoles.map((role) => CheckboxListTile(
-                title: Text(role),
+                title: Text(role, style: TextStyle(fontSize: 14.sp)),
                 value: _selectedPrevRoles.contains(role),
                 onChanged: (v) {
                   setState(() {
@@ -613,21 +649,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 16),
-        const Text('Comfortable working in a team?',
-            style: TextStyle(fontWeight: FontWeight.w600)),
+        SizedBox(height: 16.h),
+        Text('Comfortable working in a team?',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp)),
         ...['Not comfortable', 'Comfortable', 'Very comfortable']
             .map((val) => RadioListTile<String>(
-                  title: Text(val),
+                  title: Text(val, style: TextStyle(fontSize: 14.sp)),
                   value: val,
                   groupValue: _teamComfort,
                   onChanged: (v) => setState(() => _teamComfort = v),
                 )),
-        const SizedBox(height: 24),
-        const Text('Which role do you prefer in a team?',
-            style: TextStyle(fontWeight: FontWeight.w600)),
+        SizedBox(height: 24.h),
+        Text('Which role do you prefer in a team?',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp)),
         ..._preferredTeamRoles.map((role) => CheckboxListTile(
-              title: Text(role),
+              title: Text(role, style: TextStyle(fontSize: 14.sp)),
               value: _selectedPreferredRoles.contains(role),
               onChanged: (v) {
                 setState(() {
@@ -637,11 +673,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 });
               },
             )),
-        const SizedBox(height: 24),
-        const Text('Communication and presentation skills:',
-            style: TextStyle(fontWeight: FontWeight.w600)),
+        SizedBox(height: 24.h),
+        Text('Communication and presentation skills:',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp)),
         ...['Poor', 'Average', 'Good'].map((val) => RadioListTile<String>(
-              title: Text(val),
+              title: Text(val, style: TextStyle(fontSize: 14.sp)),
               value: val,
               groupValue: _commSkills,
               onChanged: (v) => setState(() => _commSkills = v),
@@ -654,11 +690,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 16),
-        const Text('Tools used before:',
-            style: TextStyle(fontWeight: FontWeight.w600)),
+        SizedBox(height: 16.h),
+        Text('Tools used before:',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp)),
         ..._tools.map((tool) => CheckboxListTile(
-              title: Text(tool),
+              title: Text(tool, style: TextStyle(fontSize: 14.sp)),
               value: _selectedTools.contains(tool),
               onChanged: (v) {
                 setState(() {
@@ -666,14 +702,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 });
               },
             )),
-        const SizedBox(height: 24),
-        const Text('Comfortable learning new tools?',
-            style: TextStyle(fontWeight: FontWeight.w600)),
+        SizedBox(height: 24.h),
+        Text('Comfortable learning new tools?',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp)),
         Row(
           children: [
             Expanded(
               child: RadioListTile<bool>(
-                title: const Text('Yes'),
+                title: Text('Yes', style: TextStyle(fontSize: 14.sp)),
                 value: true,
                 groupValue: _openToLearningNewTools,
                 onChanged: (v) => setState(() => _openToLearningNewTools = v),
@@ -681,7 +717,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             Expanded(
               child: RadioListTile<bool>(
-                title: const Text('No'),
+                title: Text('No', style: TextStyle(fontSize: 14.sp)),
                 value: false,
                 groupValue: _openToLearningNewTools,
                 onChanged: (v) => setState(() => _openToLearningNewTools = v),

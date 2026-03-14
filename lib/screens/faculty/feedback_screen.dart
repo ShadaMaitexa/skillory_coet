@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/shared_provider.dart';
 import '../../providers/coordinator_provider.dart';
 import '../../providers/guide_provider.dart';
 import '../../models/group.dart';
+import '../../widgets/custom_textfield.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -62,23 +64,34 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               final groups = snap.data ?? [];
 
               return SingleChildScrollView(
-                padding: const EdgeInsets.all(24.0),
+                padding: EdgeInsets.all(24.r),
                 child: Column(
                   children: [
                     DropdownButtonFormField<String>(
                       value: _selectedGroupId,
-                      decoration: const InputDecoration(labelText: 'Select Team'),
+                      style: TextStyle(fontSize: 14.sp, color: AppTheme.text),
+                      decoration: InputDecoration(
+                        labelText: 'Select Team',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
+                      ),
                       items: groups.map((g) => DropdownMenuItem(value: g.id, child: Text(g.name))).toList(),
                       onChanged: (val) => setState(() => _selectedGroupId = val),
                     ),
-                    const SizedBox(height: 16),
-                    TextField(
+                    SizedBox(height: 16.h),
+                    CustomTextField(
+                      label: 'Feedback',
+                      hint: 'Type your feedback here...',
                       controller: _feedbackController,
                       maxLines: 5,
-                      decoration: const InputDecoration(labelText: 'Feedback'),
                     ),
-                    const SizedBox(height: 24),
-                    ElevatedButton(onPressed: _submit, child: const Text('Submit')),
+                    SizedBox(height: 24.h),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _submit, 
+                        child: Text('Submit Feedback', style: TextStyle(fontSize: 16.sp)),
+                      ),
+                    ),
                   ],
                 ),
               );

@@ -9,6 +9,7 @@ import '../../theme/app_theme.dart';
 import '../../utils/departments_helper.dart';
 import '../auth/login_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
@@ -467,10 +468,10 @@ class _UsersTab extends StatelessWidget {
             (snapshot.connectionState == ConnectionState.waiting ? '...' : '0');
 
         return Container(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(20.r),
           decoration: BoxDecoration(
             color: AppTheme.surface,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(16.r),
             boxShadow: [
               BoxShadow(
                 color: color.withValues(alpha: 0.1),
@@ -483,31 +484,31 @@ class _UsersTab extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(12.r),
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, color: color, size: 28),
+                child: Icon(icon, color: color, size: 28.sp),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: 16.w),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppTheme.textLight,
-                      fontSize: 14,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                   Text(
                     value,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppTheme.text,
-                      fontSize: 24,
+                      fontSize: 24.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -576,8 +577,8 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDlgState) => AlertDialog(
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Text('Add Department'),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+          title: Text('Add Department', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
           content: SingleChildScrollView(
             child: Form(
               key: formKey,
@@ -587,15 +588,19 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                 children: [
                   TextFormField(
                     controller: nameCtrl,
-                    decoration: const InputDecoration(
+                    style: TextStyle(fontSize: 14.sp),
+                    decoration: InputDecoration(
                       labelText: 'Department Name',
                       hintText: 'e.g. Computer Science',
-                      prefixIcon: Icon(Icons.school_outlined),
+                      prefixIcon: Icon(Icons.school_outlined, size: 20.sp),
                     ),
-                    validator: (v) =>
-                        v == null || v.trim().isEmpty ? 'Required' : null,
+                    validator: (v) {
+                      if (v == null || v.trim().isEmpty) return 'Required';
+                      if (v.trim().length < 2) return 'Too short';
+                      return null;
+                    },
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20.h),
                   Row(
                     children: [
                       const Expanded(

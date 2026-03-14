@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../theme/app_theme.dart';
 import 'coordinator_monitoring_screen.dart';
 import 'assign_guide_screen.dart';
@@ -29,10 +30,10 @@ class _CoordinatorMainScreenState extends State<CoordinatorMainScreen> {
     return Scaffold(
       body: _screens[_currentIndex],
       bottomNavigationBar: Container(
-        margin: const EdgeInsets.only(left: 16, right: 16, bottom: 20),
+        margin: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 20.h),
         decoration: BoxDecoration(
           color: AppTheme.surface,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(24.r),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.1),
@@ -42,7 +43,7 @@ class _CoordinatorMainScreenState extends State<CoordinatorMainScreen> {
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(24.r),
           child: BottomNavigationBar(
             currentIndex: _currentIndex,
             onTap: (index) {
@@ -57,9 +58,9 @@ class _CoordinatorMainScreenState extends State<CoordinatorMainScreen> {
             unselectedItemColor: AppTheme.textLight,
             showSelectedLabels: true,
             showUnselectedLabels: false,
-            selectedLabelStyle: const TextStyle(
+            selectedLabelStyle: TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 12,
+              fontSize: 10.sp,
             ),
             items: const [
               BottomNavigationBarItem(
