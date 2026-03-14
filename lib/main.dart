@@ -40,11 +40,21 @@ Future<void> main() async {
   };
 
   try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    }
   } catch (e) {
     debugPrint("Firebase initialization error: $e");
+    // On some Android configurations, if options fail, the app might already be initialized natively
+    if (Firebase.apps.isEmpty) {
+      try {
+        await Firebase.initializeApp();
+      } catch (innerE) {
+        debugPrint("Secondary Firebase initialization error: $innerE");
+      }
+    }
   }
   runApp(const SkilloryApp());
 }

@@ -563,7 +563,13 @@ class _DepartmentsTab extends StatefulWidget {
 }
 
 class _DepartmentsTabState extends State<_DepartmentsTab> {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late final FirebaseFirestore _firestore;
+
+  @override
+  void initState() {
+    super.initState();
+    _firestore = FirebaseFirestore.instance;
+  }
 
   // ── ADD DEPARTMENT ───────────────────────────────────────
   Future<void> _showAddDepartmentDialog() async {
