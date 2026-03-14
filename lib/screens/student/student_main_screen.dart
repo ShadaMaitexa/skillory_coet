@@ -11,6 +11,7 @@ import '../../models/app_user.dart';
 import '../shared/project_details_screen.dart';
 import '../shared/chat_room_screen.dart';
 import '../shared/activity_screen.dart';
+import 'questionnaires_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../providers/shared_provider.dart';
 
@@ -263,6 +264,21 @@ class StudentDashboardContent extends StatelessWidget {
                         ),
                       ],
 
+                      SizedBox(height: 12.h),
+                      _buildFeatureCard(
+                        title: 'Questionnaires',
+                        subtitle: 'Complete assessment questions',
+                        icon: Icons.assignment_turned_in_outlined,
+                        color: const Color(0xFFF59E0B),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const QuestionnairesScreen(),
+                            ),
+                          );
+                        },
+                      ),
                       SizedBox(height: 12.h),
                       _buildFeatureCard(
                         title: 'Upload Work',

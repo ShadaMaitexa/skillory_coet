@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../theme/app_theme.dart';
 import 'coordinator_monitoring_screen.dart';
 import 'assign_guide_screen.dart';
-import 'add_questionnaire_screen.dart';
+import 'view_questionnaires_screen.dart';
 import 'feedback_screen.dart';
 import '../shared/profile_screen.dart';
 
@@ -20,7 +20,7 @@ class _CoordinatorMainScreenState extends State<CoordinatorMainScreen> {
   final List<Widget> _screens = [
     const CoordinatorMonitoringScreen(),
     const AssignGuideScreen(),
-    const AddQuestionnaireScreen(),
+    const ViewQuestionnairesScreen(),
     const FeedbackScreen(),
     const ProfileScreen(),
   ];

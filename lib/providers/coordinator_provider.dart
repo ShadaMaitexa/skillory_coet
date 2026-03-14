@@ -5,6 +5,7 @@ import '../models/app_user.dart';
 import '../repositories/user_repository.dart';
 import '../repositories/group_repository.dart';
 import '../repositories/questionnaire_repository.dart';
+import '../models/questionnaire.dart';
 
 class CoordinatorProvider extends ChangeNotifier {
   final GroupRepository _groupRepository;
@@ -25,6 +26,9 @@ class CoordinatorProvider extends ChangeNotifier {
 
   Stream<List<GroupModel>> get allGroupsStream =>
       _groupRepository.allGroupsStream();
+
+  Stream<List<Questionnaire>> get questionnairesStream =>
+      _questionnaireRepository.getQuestionnaires();
 
   Future<void> addQuestionnaire({
     required String title,
