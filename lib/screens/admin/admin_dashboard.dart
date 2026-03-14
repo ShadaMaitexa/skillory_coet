@@ -1431,17 +1431,20 @@ class _AutoFormGroupsCardState extends State<_AutoFormGroupsCard> {
       stream: departmentsStream(),
       builder: (context, snapshot) {
         final allDepts = snapshot.data ?? [];
-        final depts = allDepts.map((d) => d['name'] as String? ?? '').toList();
+        final depts = allDepts
+            .map((d) => (d['name'] ?? '').toString())
+            .where((n) => n.isNotEmpty)
+            .toList();
 
         List<String> semesters = [];
         Map<String, int> semesterLimits = {};
         Map<String, int> semesterGroupLimits = {};
         if (_selectedDept != null) {
           final deptData = allDepts.firstWhere(
-            (d) => d['name'] == _selectedDept,
+            (d) => d['name']?.toString() == _selectedDept,
             orElse: () => {},
           );
-          semesters = (deptData['semesters'] as List? ?? [])
+          semesters = (deptData['semesters'] as Iterable? ?? [])
               .map((e) => e.toString())
               .toList();
           final rawLimits = deptData['semesterLimits'] as Map<String, dynamic>?;
@@ -1495,6 +1498,7 @@ class _AutoFormGroupsCardState extends State<_AutoFormGroupsCard> {
                 ),
                 hint: const Text('Select Department'),
                 items: depts
+                    .toSet() // Ensure unique names
                     .map((d) => DropdownMenuItem(value: d, child: Text(d)))
                     .toList(),
                 onChanged: (v) => setState(() {
@@ -1504,7 +1508,7 @@ class _AutoFormGroupsCardState extends State<_AutoFormGroupsCard> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _selectedSem,
+                value: semesters.contains(_selectedSem) ? _selectedSem : null,
                 decoration: InputDecoration(
                   labelText: 'Semester',
                   prefixIcon: const Icon(Icons.calendar_month_outlined),
@@ -1514,6 +1518,7 @@ class _AutoFormGroupsCardState extends State<_AutoFormGroupsCard> {
                 ),
                 hint: const Text('Select Semester'),
                 items: semesters
+                    .toSet() // Ensure unique semesters
                     .map((s) => DropdownMenuItem(value: s, child: Text(s)))
                     .toList(),
                 onChanged: depts.isEmpty

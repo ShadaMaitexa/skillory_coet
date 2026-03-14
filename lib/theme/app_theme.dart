@@ -12,6 +12,15 @@ class AppTheme {
   static const Color textLight = Color(0xFF757575); // Grey for captions
 
   static ThemeData get lightTheme {
+    // Check if ScreenUtil is initialized safely
+    bool isInit = false;
+    try {
+      isInit = ScreenUtil().screenWidth > 0;
+    } catch (_) {
+      isInit = false;
+    }
+    final bool isScreenUtilInitialized = isInit;
+
     return ThemeData(
       useMaterial3: true,
       scaffoldBackgroundColor: background,
@@ -30,7 +39,7 @@ class AppTheme {
         iconTheme: const IconThemeData(color: dark),
         titleTextStyle: TextStyle(
           color: dark,
-          fontSize: 20.sp,
+          fontSize: isScreenUtilInitialized ? 20.sp : 20,
           fontWeight: FontWeight.bold,
           letterSpacing: -0.5,
         ),
@@ -40,12 +49,15 @@ class AppTheme {
           backgroundColor: primary,
           foregroundColor: Colors.white,
           elevation: 0,
-          padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 32.w),
+          padding: EdgeInsets.symmetric(
+            vertical: isScreenUtilInitialized ? 16.h : 16,
+            horizontal: isScreenUtilInitialized ? 32.w : 32,
+          ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.r),
+            borderRadius: BorderRadius.circular(isScreenUtilInitialized ? 12.r : 12),
           ),
           textStyle: TextStyle(
-            fontSize: 16.sp,
+            fontSize: isScreenUtilInitialized ? 16.sp : 16,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.5,
           ),
@@ -55,12 +67,15 @@ class AppTheme {
         style: OutlinedButton.styleFrom(
           foregroundColor: primary,
           side: const BorderSide(color: primary, width: 2),
-          padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 32.w),
+          padding: EdgeInsets.symmetric(
+            vertical: isScreenUtilInitialized ? 16.h : 16,
+            horizontal: isScreenUtilInitialized ? 32.w : 32,
+          ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.r),
+            borderRadius: BorderRadius.circular(isScreenUtilInitialized ? 12.r : 12),
           ),
           textStyle: TextStyle(
-            fontSize: 16.sp,
+            fontSize: isScreenUtilInitialized ? 16.sp : 16,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.5,
           ),
@@ -70,32 +85,37 @@ class AppTheme {
         filled: true,
         fillColor: surface,
         contentPadding: EdgeInsets.symmetric(
-          horizontal: 20.w,
-          vertical: 16.h,
+          horizontal: isScreenUtilInitialized ? 20.w : 20,
+          vertical: isScreenUtilInitialized ? 16.h : 16,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.r),
+          borderRadius: BorderRadius.circular(isScreenUtilInitialized ? 12.r : 12),
           borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.r),
+          borderRadius: BorderRadius.circular(isScreenUtilInitialized ? 12.r : 12),
           borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.r),
+          borderRadius: BorderRadius.circular(isScreenUtilInitialized ? 12.r : 12),
           borderSide: const BorderSide(color: primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.r),
+          borderRadius: BorderRadius.circular(isScreenUtilInitialized ? 12.r : 12),
           borderSide: const BorderSide(color: Color(0xFFB00020)),
         ),
-        hintStyle: TextStyle(color: textLight, fontSize: 14.sp),
+        hintStyle: TextStyle(
+          color: textLight,
+          fontSize: isScreenUtilInitialized ? 14.sp : 14,
+        ),
       ),
       cardTheme: CardThemeData(
         color: surface,
         elevation: 4,
         shadowColor: Colors.black.withOpacity(0.1),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(isScreenUtilInitialized ? 16.r : 16),
+        ),
       ),
     );
   }

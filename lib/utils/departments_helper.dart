@@ -7,7 +7,11 @@ Stream<List<Map<String, dynamic>>> departmentsStream() {
       .collection('departments')
       .orderBy('name')
       .snapshots()
-      .map((snap) => snap.docs
-          .map((d) => d.data() as Map<String, dynamic>)
-          .toList());
+      .map((snap) => snap.docs.map((d) {
+            final data = d.data();
+            return {
+              ...data,
+              'name': data['name'] ?? d.id, // Fallback to doc ID if name field is missing
+            };
+          }).toList());
 }

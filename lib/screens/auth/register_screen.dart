@@ -427,9 +427,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ? const Text('Loading departments...')
                 : const Text('Select Department'),
             items: _allDepartments
-                .map((d) => DropdownMenuItem(
-                      value: d['name'] as String,
-                      child: Text(d['name'] as String),
+                .map((d) => (d['name'] ?? '').toString())
+                .where((name) => name.isNotEmpty)
+                .toSet() // Ensure unique names
+                .map((name) => DropdownMenuItem(
+                      value: name,
+                      child: Text(name),
                     ))
                 .toList(),
             onChanged: (v) => setState(() {
@@ -457,14 +460,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
           // Semester Dropdown (depends on dept)
           Builder(builder: (context) {
             final deptData = _allDepartments.firstWhere(
-              (d) => d['name'] == _selectedDept,
+              (d) => d['name']?.toString() == _selectedDept?.toString(),
               orElse: () => {},
             );
-            final semesters = (deptData['semesters'] as List? ?? [])
+            final semesters = (deptData['semesters'] as Iterable? ?? [])
                 .map((e) => e.toString())
                 .toList();
             return DropdownButtonFormField<String>(
-              value: _selectedSem,
+              value: semesters.contains(_selectedSem) ? _selectedSem : null,
               style: TextStyle(fontSize: 14.sp, color: AppTheme.text),
               decoration: InputDecoration(
                 labelText: 'Year / Semester',
@@ -478,6 +481,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ? const Text('Select department first')
                   : const Text('Select Semester'),
               items: semesters
+                  .toSet() // Ensure unique semesters
                   .map((s) => DropdownMenuItem(value: s, child: Text(s)))
                   .toList(),
               onChanged: _selectedDept == null

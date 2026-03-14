@@ -48,6 +48,8 @@ class _AddQuestionnaireScreenState extends State<AddQuestionnaireScreen> {
           questions: questions,
         );
 
+    if (!mounted) return;
+
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Questionnaire published!')),
