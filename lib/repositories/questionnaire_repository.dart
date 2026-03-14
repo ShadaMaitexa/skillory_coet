@@ -2,15 +2,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/questionnaire.dart';
 
 class QuestionnaireRepository {
-  final FirebaseFirestore _firestore;
+  FirebaseFirestore get _firestore => FirebaseFirestore.instance;
 
-  QuestionnaireRepository({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+  QuestionnaireRepository();
 
   Stream<List<Questionnaire>> getQuestionnaires() {
     return _firestore
         .collection('questionnaires')
-        .orderBy('created', descending: true)
+    
         .snapshots()
         .map((snap) => snap.docs.map((doc) => Questionnaire.fromDocument(doc)).toList());
   }

@@ -3,20 +3,16 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../models/file_meta.dart';
 
 class FileRepository {
-  final FirebaseFirestore _firestore;
-  final FirebaseAuth _auth;
+  FirebaseFirestore get _firestore => FirebaseFirestore.instance;
+  FirebaseAuth get _auth => FirebaseAuth.instance;
 
-  FileRepository({
-    FirebaseFirestore? firestore,
-    FirebaseAuth? auth,
-  })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance;
+  FileRepository();
 
   Stream<List<FileMeta>> getFilesForGroup(String groupId) {
     return _firestore
         .collection('files')
         .where('groupId', isEqualTo: groupId)
-        .orderBy('timestamp', descending: true)
+    
         .snapshots()
         .map((snap) => snap.docs.map((doc) => FileMeta.fromDocument(doc)).toList());
   }

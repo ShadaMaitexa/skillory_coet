@@ -3,20 +3,16 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../models/feedback.dart';
 
 class FeedbackRepository {
-  final FirebaseFirestore _firestore;
-  final FirebaseAuth _auth;
+  FirebaseFirestore get _firestore => FirebaseFirestore.instance;
+  FirebaseAuth get _auth => FirebaseAuth.instance;
 
-  FeedbackRepository({
-    FirebaseFirestore? firestore,
-    FirebaseAuth? auth,
-  })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance;
+  FeedbackRepository();
 
   Stream<List<FeedbackModel>> getFeedbackForGroup(String groupId) {
     return _firestore
         .collection('feedback')
         .where('groupId', isEqualTo: groupId)
-        .orderBy('timestamp', descending: true)
+     
         .snapshots()
         .map((snap) => snap.docs.map((doc) => FeedbackModel.fromDocument(doc)).toList());
   }

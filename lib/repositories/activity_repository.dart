@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 
 class ActivityModel {
   final String id;
@@ -45,7 +47,8 @@ class ActivityModel {
 }
 
 class ActivityRepository {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  FirebaseFirestore get _firestore => FirebaseFirestore.instance;
+  FirebaseAuth get _auth => FirebaseAuth.instance;
 
   Stream<List<ActivityModel>> getActivities(String userId) {
     return _firestore

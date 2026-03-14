@@ -40,22 +40,35 @@ Future<void> main() async {
   };
 
   try {
+    debugPrint("Initializing Firebase...");
     if (Firebase.apps.isEmpty) {
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
+      debugPrint("Firebase initialized with currentPlatform options.");
+    } else {
+      debugPrint("Firebase already initialized (apps not empty).");
     }
   } catch (e) {
-    debugPrint("Firebase initialization error: $e");
-    // On some Android configurations, if options fail, the app might already be initialized natively
+    debugPrint("First Firebase initialization attempt failed: $e");
+    // Fallback: บางครั้งบน Android การใช้ options อาจจะติดปัญหาถ้ามีการประกาศใน native
     if (Firebase.apps.isEmpty) {
       try {
+        debugPrint("Attempting secondary Firebase initialization without options...");
         await Firebase.initializeApp();
+        debugPrint("Firebase initialized secondary attempt.");
       } catch (innerE) {
-        debugPrint("Secondary Firebase initialization error: $innerE");
+        debugPrint("Secondary Firebase initialization failed: $innerE");
       }
     }
   }
+
+  if (Firebase.apps.isEmpty) {
+    debugPrint("CRITICAL: Firebase apps list is STILL EMPTY after initialization attempts!");
+  } else {
+    debugPrint("Firebase apps initialized: ${Firebase.apps.length}");
+  }
+
   runApp(const SkilloryApp());
 }
 
@@ -64,6 +77,42 @@ class SkilloryApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (Firebase.apps.isEmpty) {
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        home: Scaffold(
+          body: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, color: Colors.red, size: 80),
+                const SizedBox(height: 24),
+                const Text(
+                  'Firebase Initialization Failed',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'The application could not connect to Firebase services. This may be due to improper configuration or missing internet access.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey),
+                ),
+                const SizedBox(height: 32),
+                ElevatedButton(
+                  onPressed: () {
+                    main(); // Attempt to restart the app flow
+                  },
+                  child: const Text('Try Again'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AdminProvider()),

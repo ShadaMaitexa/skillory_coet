@@ -1,22 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 import '../models/chat_message.dart';
 
 class ChatRepository {
-  final FirebaseFirestore _firestore;
-  final FirebaseAuth _auth;
+  FirebaseFirestore get _firestore => FirebaseFirestore.instance;
+  FirebaseAuth get _auth => FirebaseAuth.instance;
 
-  ChatRepository({
-    FirebaseFirestore? firestore,
-    FirebaseAuth? auth,
-  })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance;
+  ChatRepository();
 
   Stream<List<ChatMessage>> getMessagesForGroup(String groupId) {
     return _firestore
         .collection('messages')
         .where('groupId', isEqualTo: groupId)
-        .orderBy('timestamp', descending: true)
+       
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) => ChatMessage.fromDocument(doc)).toList());
   }

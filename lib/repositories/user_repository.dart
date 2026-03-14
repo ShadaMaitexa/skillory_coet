@@ -2,10 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/app_user.dart';
 
 class UserRepository {
-  final FirebaseFirestore _firestore;
+  FirebaseFirestore get _firestore => FirebaseFirestore.instance;
 
-  UserRepository({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+  UserRepository();
 
   Stream<List<AppUser>> getAllUsersStream() {
     return _firestore.collection('users').snapshots().map(

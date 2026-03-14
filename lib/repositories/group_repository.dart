@@ -4,14 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../models/group.dart';
 
 class GroupRepository {
-  final FirebaseFirestore _firestore;
-  final FirebaseAuth _auth;
+  FirebaseFirestore get _firestore => FirebaseFirestore.instance;
+  FirebaseAuth get _auth => FirebaseAuth.instance;
 
-  GroupRepository({
-    FirebaseFirestore? firestore,
-    FirebaseAuth? auth,
-  })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance;
+  GroupRepository();
 
   Stream<List<GroupModel>> groupsForCurrentCoordinator() {
     final user = _auth.currentUser;
