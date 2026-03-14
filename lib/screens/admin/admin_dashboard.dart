@@ -289,7 +289,7 @@ class _UsersTab extends StatelessWidget {
                                 ),
                                 decoration: BoxDecoration(
                                   color:
-                                      AppTheme.primary.withValues(alpha: 0.1),
+                                      AppTheme.primary.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: const Row(
@@ -429,7 +429,7 @@ class _UsersTab extends StatelessWidget {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: statusColor.withValues(alpha: 0.1),
+                                color: statusColor.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
@@ -474,7 +474,7 @@ class _UsersTab extends StatelessWidget {
             borderRadius: BorderRadius.circular(16.r),
             boxShadow: [
               BoxShadow(
-                color: color.withValues(alpha: 0.1),
+                color: color.withOpacity(0.1),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -486,7 +486,7 @@ class _UsersTab extends StatelessWidget {
               Container(
                 padding: EdgeInsets.all(12.r),
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
+                  color: color.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(icon, color: color, size: 28.sp),
@@ -640,60 +640,90 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                     final e = entry.value;
                     return Padding(
                       padding: const EdgeInsets.only(top: 10),
-                      child: Row(
+                      child: Column(
                         children: [
-                          Expanded(
-                            flex: 3,
-                            child: TextFormField(
-                              controller: e['semCtrl'] as TextEditingController,
-                              decoration: InputDecoration(
-                                labelText: 'Semester ${i + 1}',
-                                hintText: 'e.g. 1st Sem',
-                                isDense: true,
+                          Row(
+                            children: [
+                              Expanded(
+                                flex: 3,
+                                child: TextFormField(
+                                  controller: e['semCtrl'] as TextEditingController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Semester ${i + 1}',
+                                    hintText: 'e.g. 1st Sem',
+                                    isDense: true,
+                                  ),
+                                  validator: (v) => v == null || v.trim().isEmpty
+                                      ? 'Required'
+                                      : null,
+                                ),
                               ),
-                              validator: (v) => v == null || v.trim().isEmpty
-                                  ? 'Required'
-                                  : null,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            flex: 2,
-                            child: TextFormField(
-                              controller:
-                                  e['limitCtrl'] as TextEditingController,
-                              decoration: const InputDecoration(
-                                labelText: 'Limit',
-                                hintText: '60',
-                                isDense: true,
-                                prefixIcon: Icon(Icons.people, size: 16),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                flex: 2,
+                                child: TextFormField(
+                                  controller:
+                                      e['limitCtrl'] as TextEditingController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Students',
+                                    hintText: '60',
+                                    isDense: true,
+                                  ),
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly
+                                  ],
+                                  validator: (v) {
+                                    if (v == null || v.trim().isEmpty) {
+                                      return 'Req';
+                                    }
+                                    final n = int.tryParse(v);
+                                    if (n == null || n < 1) return 'Err';
+                                    return null;
+                                  },
+                                ),
                               ),
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly
-                              ],
-                              validator: (v) {
-                                if (v == null || v.trim().isEmpty) {
-                                  return 'Required';
-                                }
-                                final n = int.tryParse(v);
-                                if (n == null || n < 1) return 'Invalid';
-                                return null;
-                              },
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.remove_circle_outline,
-                                color: Colors.red, size: 20),
-                            onPressed: () {
-                              setDlgState(() {
-                                (e['semCtrl'] as TextEditingController)
-                                    .dispose();
-                                (e['limitCtrl'] as TextEditingController)
-                                    .dispose();
-                                semEntries.removeAt(i);
-                              });
-                            },
+                              const SizedBox(width: 8),
+                              Expanded(
+                                flex: 2,
+                                child: TextFormField(
+                                  controller:
+                                      e['groupLimitCtrl'] as TextEditingController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Grp Size',
+                                    hintText: '4',
+                                    isDense: true,
+                                  ),
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly
+                                  ],
+                                  validator: (v) {
+                                    if (v == null || v.trim().isEmpty) {
+                                      return 'Req';
+                                    }
+                                    final n = int.tryParse(v);
+                                    if (n == null || n < 1) return 'Err';
+                                    return null;
+                                  },
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.remove_circle_outline,
+                                    color: Colors.red, size: 20),
+                                onPressed: () {
+                                  setDlgState(() {
+                                    (e['semCtrl'] as TextEditingController)
+                                        .dispose();
+                                    (e['limitCtrl'] as TextEditingController)
+                                        .dispose();
+                                    (e['groupLimitCtrl'] as TextEditingController)
+                                        .dispose();
+                                    semEntries.removeAt(i);
+                                  });
+                                },
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -717,40 +747,50 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                   );
                   return;
                 }
-                final name = nameCtrl.text.trim();
-                final semesters = semEntries
-                    .map((e) =>
-                        (e['semCtrl'] as TextEditingController).text.trim())
-                    .toList();
-                final semesterLimits = <String, int>{};
-                final semesterGroupLimits = <String, int>{};
-                for (final e in semEntries) {
-                  final sem =
-                      (e['semCtrl'] as TextEditingController).text.trim();
-                  final limit = int.parse(
-                      (e['limitCtrl'] as TextEditingController).text.trim());
-                  final groupLimit = int.parse(
-                      (e['groupLimitCtrl'] as TextEditingController).text.trim());
-                  semesterLimits[sem] = limit;
-                  semesterGroupLimits[sem] = groupLimit;
+                try {
+                  final name = nameCtrl.text.trim();
+                  final semesters = semEntries
+                      .map((e) =>
+                          (e['semCtrl'] as TextEditingController).text.trim())
+                      .toList();
+                  final semesterLimits = <String, int>{};
+                  final semesterGroupLimits = <String, int>{};
+                  for (final e in semEntries) {
+                    final sem =
+                        (e['semCtrl'] as TextEditingController).text.trim();
+                    final limitStr = (e['limitCtrl'] as TextEditingController).text.trim();
+                    final groupLimitStr = (e['groupLimitCtrl'] as TextEditingController).text.trim();
+                    
+                    final limit = int.tryParse(limitStr) ?? 0;
+                    final groupLimit = int.tryParse(groupLimitStr) ?? 4;
+                    
+                    semesterLimits[sem] = limit;
+                    semesterGroupLimits[sem] = groupLimit;
+                  }
+
+                  await _firestore.collection('departments').doc(name).set({
+                    'name': name,
+                    'semesters': semesters,
+                    'semesterLimits': semesterLimits,
+                    'semesterGroupLimits': semesterGroupLimits,
+                    'createdAt': FieldValue.serverTimestamp(),
+                  });
+
+                  // Dispose controllers
+                  for (final e in semEntries) {
+                    (e['semCtrl'] as TextEditingController).dispose();
+                    (e['limitCtrl'] as TextEditingController).dispose();
+                    (e['groupLimitCtrl'] as TextEditingController).dispose();
+                  }
+
+                  if (ctx.mounted) Navigator.of(ctx).pop();
+                } catch (e) {
+                  if (ctx.mounted) {
+                    ScaffoldMessenger.of(ctx).showSnackBar(
+                      SnackBar(content: Text('Error: $e')),
+                    );
+                  }
                 }
-
-                await _firestore.collection('departments').doc(name).set({
-                  'name': name,
-                  'semesters': semesters,
-                  'semesterLimits': semesterLimits,
-                  'semesterGroupLimits': semesterGroupLimits,
-                  'createdAt': FieldValue.serverTimestamp(),
-                });
-
-                // Dispose controllers
-                for (final e in semEntries) {
-                  (e['semCtrl'] as TextEditingController).dispose();
-                  (e['limitCtrl'] as TextEditingController).dispose();
-                  (e['groupLimitCtrl'] as TextEditingController).dispose();
-                }
-
-                if (ctx.mounted) Navigator.of(ctx).pop();
               },
               child: const Text('Add'),
             ),
@@ -844,60 +884,90 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                     final e = entry.value;
                     return Padding(
                       padding: const EdgeInsets.only(top: 10),
-                      child: Row(
+                      child: Column(
                         children: [
-                          Expanded(
-                            flex: 3,
-                            child: TextFormField(
-                              controller: e['semCtrl'] as TextEditingController,
-                              decoration: InputDecoration(
-                                labelText: 'Semester ${i + 1}',
-                                hintText: 'e.g. 1st Sem',
-                                isDense: true,
+                          Row(
+                            children: [
+                              Expanded(
+                                flex: 3,
+                                child: TextFormField(
+                                  controller: e['semCtrl'] as TextEditingController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Semester ${i + 1}',
+                                    hintText: 'e.g. 1st Sem',
+                                    isDense: true,
+                                  ),
+                                  validator: (v) => v == null || v.trim().isEmpty
+                                      ? 'Required'
+                                      : null,
+                                ),
                               ),
-                              validator: (v) => v == null || v.trim().isEmpty
-                                  ? 'Required'
-                                  : null,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            flex: 2,
-                            child: TextFormField(
-                              controller:
-                                  e['limitCtrl'] as TextEditingController,
-                              decoration: const InputDecoration(
-                                labelText: 'Limit',
-                                hintText: '60',
-                                isDense: true,
-                                prefixIcon: Icon(Icons.people, size: 16),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                flex: 2,
+                                child: TextFormField(
+                                  controller:
+                                      e['limitCtrl'] as TextEditingController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Students',
+                                    hintText: '60',
+                                    isDense: true,
+                                  ),
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly
+                                  ],
+                                  validator: (v) {
+                                    if (v == null || v.trim().isEmpty) {
+                                      return 'Req';
+                                    }
+                                    final n = int.tryParse(v);
+                                    if (n == null || n < 1) return 'Err';
+                                    return null;
+                                  },
+                                ),
                               ),
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly
-                              ],
-                              validator: (v) {
-                                if (v == null || v.trim().isEmpty) {
-                                  return 'Required';
-                                }
-                                final n = int.tryParse(v);
-                                if (n == null || n < 1) return 'Invalid';
-                                return null;
-                              },
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.remove_circle_outline,
-                                color: Colors.red, size: 20),
-                            onPressed: () {
-                              setDlgState(() {
-                                (e['semCtrl'] as TextEditingController)
-                                    .dispose();
-                                (e['limitCtrl'] as TextEditingController)
-                                    .dispose();
-                                semEntries.removeAt(i);
-                              });
-                            },
+                              const SizedBox(width: 8),
+                              Expanded(
+                                flex: 2,
+                                child: TextFormField(
+                                  controller:
+                                      e['groupLimitCtrl'] as TextEditingController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Grp Size',
+                                    hintText: '4',
+                                    isDense: true,
+                                  ),
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly
+                                  ],
+                                  validator: (v) {
+                                    if (v == null || v.trim().isEmpty) {
+                                      return 'Req';
+                                    }
+                                    final n = int.tryParse(v);
+                                    if (n == null || n < 1) return 'Err';
+                                    return null;
+                                  },
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.remove_circle_outline,
+                                    color: Colors.red, size: 20),
+                                onPressed: () {
+                                  setDlgState(() {
+                                    (e['semCtrl'] as TextEditingController)
+                                        .dispose();
+                                    (e['limitCtrl'] as TextEditingController)
+                                        .dispose();
+                                    (e['groupLimitCtrl'] as TextEditingController)
+                                        .dispose();
+                                    semEntries.removeAt(i);
+                                  });
+                                },
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -921,45 +991,55 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                   );
                   return;
                 }
-                final newName = nameCtrl.text.trim();
-                final semesters = semEntries
-                    .map((e) =>
-                        (e['semCtrl'] as TextEditingController).text.trim())
-                    .toList();
-                final semesterLimits = <String, int>{};
-                final semesterGroupLimits = <String, int>{};
-                for (final e in semEntries) {
-                  final sem =
-                      (e['semCtrl'] as TextEditingController).text.trim();
-                  final limit = int.parse(
-                      (e['limitCtrl'] as TextEditingController).text.trim());
-                  final groupLimit = int.parse(
-                      (e['groupLimitCtrl'] as TextEditingController).text.trim());
-                  semesterLimits[sem] = limit;
-                  semesterGroupLimits[sem] = groupLimit;
-                }
+                try {
+                  final newName = nameCtrl.text.trim();
+                  final semesters = semEntries
+                      .map((e) =>
+                          (e['semCtrl'] as TextEditingController).text.trim())
+                      .toList();
+                  final semesterLimits = <String, int>{};
+                  final semesterGroupLimits = <String, int>{};
+                  for (final e in semEntries) {
+                    final sem =
+                        (e['semCtrl'] as TextEditingController).text.trim();
+                    final limitStr = (e['limitCtrl'] as TextEditingController).text.trim();
+                    final groupLimitStr = (e['groupLimitCtrl'] as TextEditingController).text.trim();
 
-                if (newName != docId) {
-                  await _firestore
-                      .collection('departments')
-                      .doc(docId)
-                      .delete();
-                }
-                await _firestore.collection('departments').doc(newName).set({
-                  'name': newName,
-                  'semesters': semesters,
-                  'semesterLimits': semesterLimits,
-                  'semesterGroupLimits': semesterGroupLimits,
-                  'updatedAt': FieldValue.serverTimestamp(),
-                });
+                    final limit = int.tryParse(limitStr) ?? 0;
+                    final groupLimit = int.tryParse(groupLimitStr) ?? 4;
 
-                for (final e in semEntries) {
-                  (e['semCtrl'] as TextEditingController).dispose();
-                  (e['limitCtrl'] as TextEditingController).dispose();
-                  (e['groupLimitCtrl'] as TextEditingController).dispose();
-                }
+                    semesterLimits[sem] = limit;
+                    semesterGroupLimits[sem] = groupLimit;
+                  }
 
-                if (ctx.mounted) Navigator.of(ctx).pop();
+                  if (newName != docId) {
+                    await _firestore
+                        .collection('departments')
+                        .doc(docId)
+                        .delete();
+                  }
+                  await _firestore.collection('departments').doc(newName).set({
+                    'name': newName,
+                    'semesters': semesters,
+                    'semesterLimits': semesterLimits,
+                    'semesterGroupLimits': semesterGroupLimits,
+                    'updatedAt': FieldValue.serverTimestamp(),
+                  });
+
+                  for (final e in semEntries) {
+                    (e['semCtrl'] as TextEditingController).dispose();
+                    (e['limitCtrl'] as TextEditingController).dispose();
+                    (e['groupLimitCtrl'] as TextEditingController).dispose();
+                  }
+
+                  if (ctx.mounted) Navigator.of(ctx).pop();
+                } catch (e) {
+                  if (ctx.mounted) {
+                    ScaffoldMessenger.of(ctx).showSnackBar(
+                      SnackBar(content: Text('Error: $e')),
+                    );
+                  }
+                }
               },
               child: const Text('Save'),
             ),
@@ -1062,7 +1142,7 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                       children: [
                         Icon(Icons.school_outlined,
                             size: 64,
-                            color: AppTheme.textLight.withValues(alpha: 0.4)),
+                            color: AppTheme.textLight.withOpacity(0.4)),
                         const SizedBox(height: 16),
                         const Text(
                           'No departments yet.\nTap "Add" to create the first one.',
@@ -1106,7 +1186,7 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                         border: Border.all(color: const Color(0xFFE2E8F0)),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.03),
+                            color: Colors.black.withOpacity(0.03),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -1123,7 +1203,7 @@ class _DepartmentsTabState extends State<_DepartmentsTab> {
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
                                     color:
-                                        AppTheme.primary.withValues(alpha: 0.1),
+                                        AppTheme.primary.withOpacity(0.1),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: const Icon(
@@ -1233,13 +1313,13 @@ class _SemesterCapacityRow extends StatelessWidget {
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: isFull
-                          ? Colors.red.withValues(alpha: 0.1)
-                          : AppTheme.primary.withValues(alpha: 0.08),
+                          ? Colors.red.withOpacity(0.1)
+                          : AppTheme.primary.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: isFull
-                            ? Colors.red.withValues(alpha: 0.4)
-                            : AppTheme.primary.withValues(alpha: 0.3),
+                            ? Colors.red.withOpacity(0.4)
+                            : AppTheme.primary.withOpacity(0.3),
                       ),
                     ),
                     child: Text(
@@ -1383,7 +1463,7 @@ class _AutoFormGroupsCardState extends State<_AutoFormGroupsCard> {
             border: Border.all(color: const Color(0xFFE2E8F0)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
+                color: Colors.black.withOpacity(0.04),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -1608,7 +1688,7 @@ class _GenerateGroupsSection extends StatelessWidget {
                 label: Text(isLoading
                     ? 'Forming...'
                     : isFull
-                        ? 'Generate Groups ( per group)'
+                        ? 'Generate Groups ($groupLimit per group)'
                         : 'Generate Groups (Semester not full yet)'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: isFull ? AppTheme.primary : Colors.grey,
